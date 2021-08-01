@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# Copyright © 2021 qualIP Software
+#
+# This file is part of shfuncs:
+#
+#     https://github.com/qualIP/shfuncs
+#
+# shfuncs is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3.0 of the License, or (at your option)
+# any later version.
+#
+# shfuncs is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with shfuncs; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+set -euo pipefail
+
+shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+. "$shfuncs_dir/func-test.sh"
+. "$shfuncs_dir/func-tty-colors.sh"
+
+test_color_palette() {
+    local line v c
+
+    local BK=BLACK
+    local RD=RED
+    local GR=GREEN
+    local YE=YELLOW
+    local BL=BLUE
+    local MA=MAGENTA
+    local CY=CYAN
+    local WH=WHITE
+    local colors="BK RD GR YE BL MA CY WH"
+
+    line="  "
+    for fg in $colors ; do
+        line="$line $fg"
+    done
+    for fg in $colors ; do
+        line="$line $fg"
+    done
+    echo "$line"
+
+    for bg in $colors ; do
+        eval "v=\$$bg"
+        eval "c=\$cb$v"
+        line="$bg$c"
+        for fg in $colors ; do
+            eval "v=\$$fg"
+            eval "c=\$c${v}"
+            line="$line ${c}XX"
+        done
+        for fg in $colors ; do
+            eval "v=\$$fg"
+            eval "c=\$c${v}b"
+            line="$line ${c}XX"
+        done
+        line="$line $cOFF"
+        echo "$line"
+    done
+}
+
+test_colors() {
+    echo "White on Black:  ${cWHITE}${cbBLACK}THIS IS A TEST${cbOFF}${cOFF}"
+    echo "Blackb on White: ${cBLACKb}${cbWHITE}THIS IS A TEST${cbOFF}${cOFF}"
+    echo "Black on White:  ${cBLACK}${cbWHITE}THIS IS A TEST${cbOFF}${cOFF}"
+    echo "Black:           ${cBLACK}THIS IS A TEST${cOFF}"
+    echo "Blackb:          ${cBLACKb}THIS IS A TEST${cOFF}"
+}
+
+test_case test_color_palette
+test_color_palette
+echo
+
+test_case test_colors
+test_colors
+echo

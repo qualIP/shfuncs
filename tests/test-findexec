@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Copyright © 2021 qualIP Software
+#
+# This file is part of shfuncs:
+#
+#     https://github.com/qualIP/shfuncs
+#
+# shfuncs is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3.0 of the License, or (at your option)
+# any later version.
+#
+# shfuncs is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with shfuncs; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+set -euo pipefail
+
+shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+. "$shfuncs_dir/func-test.sh"
+. "$shfuncs_dir/func-findexec.sh"
+
+test_case my_which
+test_assert_equal "$(my_which env)" "$(which env)"
+
+test_case findexec
+tty_colors_off
+test_assert_rc 0 findexec env > /dev/null
+test_assert_equal "$(findexec env)" "$(which env)"
+test_assert_equal "$(findexec path-does-not-exist 2> /dev/null || true)" ""
+test_assert_equal "$(findexec path-does-not-exist 2>&1 || true)" "** Executable not found: path-does-not-exist **"
+test_assert_rc 1 findexec path-does-not-exist 2> /dev/null
+test_assert_equal "$(findexec path-does-not-exist env)" "$(which env)"
+test_assert_equal "$(findexec env path-does-not-exist)" "$(which env)"
+setup_tty_colors
+
+test_case next_in_path
+PATH=/usr/bin:/bin test_assert_equal "$(next_in_path /usr/bin/touch)" "/bin/touch"
+
+test_case realpath
+test_assert_equal "$(_realpath /some-path///)" "/some-path"
+test_assert_equal "$(_realpath /etc/../file)" "/file"

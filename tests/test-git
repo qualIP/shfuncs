@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Copyright © 2021 qualIP Software
+#
+# This file is part of shfuncs:
+#
+#     https://github.com/qualIP/shfuncs
+#
+# shfuncs is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3.0 of the License, or (at your option)
+# any later version.
+#
+# shfuncs is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with shfuncs; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+#set -euo pipefail
+set -e
+
+shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+. "$shfuncs_dir/func-test.sh"
+. "$shfuncs_dir/func-git.sh"
+. "$shfuncs_dir/func-cmd.sh"
+
+TEST_TMP_DIR="$shfuncs_dir/test.TEST_TMP_DIR.tmp"
+rm -Rf "$TEST_TMP_DIR"
+
+mkdir "$TEST_TMP_DIR"
+mkdir "$TEST_TMP_DIR/a"
+pushd "$TEST_TMP_DIR/a" > /dev/null
+git init
+test_case test_git_changeset
+test_assert_rc 0 test_git_changeset
+echo 1 > a
+(set -x ; cat a)
+test_assert_rc 0 test_git_changeset
+git add a
+test_assert_rc 1 test_git_changeset
+git commit -m a1 --no-gpg-sign
+test_assert_rc 0 test_git_changeset
+echo 2 > a
+(set -x ; cat a)
+test_assert_rc 1 test_git_changeset
+git worktree add ../b
+cd ../b
+test_assert_rc 0 test_git_changeset
+cd ../a
+
+test_case git_dir
+test_assert_equal "$(git_dir)" ".git"
+mkdir sub
+test_assert_equal "$(cd sub && git_dir)" "$TEST_TMP_DIR/a/.git"
+test_assert_equal "$(cd ../b && git_dir)" "$TEST_TMP_DIR/a/.git/worktrees/b"
+
+test_case git_toplevel
+test_assert_equal "$(git_toplevel)" "$TEST_TMP_DIR/a"
+#mkdir sub
+test_assert_equal "$(cd sub && git_toplevel)" "$TEST_TMP_DIR/a"
+test_assert_equal "$(cd ../b && git_toplevel)" "$TEST_TMP_DIR/b"
+
+popd > /dev/null
+
+rm -Rf "$TEST_TMP_DIR"
+unset TEST_TMP_DIR

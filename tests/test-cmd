@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+# Copyright © 2021 qualIP Software
+#
+# This file is part of shfuncs:
+#
+#     https://github.com/qualIP/shfuncs
+#
+# shfuncs is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3.0 of the License, or (at your option)
+# any later version.
+#
+# shfuncs is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with shfuncs; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+set -euo pipefail
+
+shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+. "$shfuncs_dir/func-test.sh"
+. "$shfuncs_dir/func-cmd.sh"
+
+OUT_TMP="$shfuncs_dir/test.OUT_TMP_file.tmp"
+OUT_TMP_DIR="$shfuncs_dir/test.OUT_TMP_DIR.tmp"
+mkdir -p "$OUT_TMP_DIR"
+
+unset OPT_DRYRUN
+
+test_case run_indent
+test_assert_equal "$(run_indent echo "abc")" "    abc"
+
+test_case run_indent_esc
+test_assert_equal "$(run_indent_esc echo "abc")" "    abc"
+
+test_case run_cmd_redirected
+test_assert_equal "$(run_cmd_redirected "$OUT_TMP" echo "abc")" ""
+test_assert_equal "$(<"$OUT_TMP")" "abc"
+
+test_case run_cmd_piped
+test_assert_equal "$(run_cmd_piped "$OUT_TMP" echo "abc")" "abc"
+test_assert_equal "$(<"$OUT_TMP")" "abc"
+
+test_case run_cmd_piped_nohup
+test_assert_equal "$(run_cmd_piped_nohup "$OUT_TMP" echo "abc")" "abc"
+test_assert_equal "$(<"$OUT_TMP")" "abc"
+
+test_case run_cmd_piped_pty
+test_assert_equal "$(run_cmd_piped_pty "$OUT_TMP" echo "abc")" "abc"$'\r'
+run_cmd_piped_pty "$OUT_TMP" echo "abc"
+test_assert_equal "$(grep abc "$OUT_TMP")" "abc"$'\r'
+
+tty_colors_off
+
+test_case log_cmd
+test_assert_equal "$(log_cmd echo "abc")" "    $ echo abc           OK"
+test_assert_equal "$(<"$OUT_TMP")" "abc"
+
+test_case log_cmd_long
+test_assert_equal "$(log_cmd_long echo "abc")" "    $ echo abc           ...
+    $ echo abc           OK"
+test_assert_equal "$(<"$OUT_TMP")" "abc"
+
+test_case log_cmd_live
+test_assert_equal "$(log_cmd_live echo "abc")" "    $ echo abc
+    abc"
+test_assert_equal "$(<"$OUT_TMP")" "abc"
+
+test_case log_cmd_live_nohup
+test_assert_equal "$(log_cmd_live_nohup echo "abc")" "    $ echo abc
+    abc"
+test_assert_equal "$(<"$OUT_TMP")" "abc"
+
+test_case log_cmd_live_pty
+test_assert_equal "$(log_cmd_live_pty echo "abc")" "    $ echo abc
+    abc"$'\r'
+test_assert_equal "$(grep abc "$OUT_TMP")" "abc"$'\r'
+
+test_case log_cmd_nostatus
+test_assert_equal "$(log_cmd_nostatus echo "abc")" "    $ echo abc
+    abc"
+#test_assert_equal "$(<"$OUT_TMP")" "abc"
+test_assert_rc 0 test -s "$OUT_TMP"
+
+test_case log_cmd_nostatus_interactive
+test_assert_equal "$(log_cmd_nostatus_interactive echo "abc")" "    $ echo abc
+abc"
+#test_assert_equal "$(<"$OUT_TMP")" "abc"
+test_assert_rc 0 test -s "$OUT_TMP"
+
+test_case log_cmd_interactive
+test_assert_equal "$(log_cmd_interactive echo "abc")" "    $ echo abc
+abc"
+#test_assert_equal "$(<"$OUT_TMP")" "abc"
+test_assert_rc 0 test -s "$OUT_TMP"
+
+test_case log_cmd_nostatus_shell
+test_assert_equal "$(log_cmd_nostatus_shell VAR=value echo "abc")" "    $ VAR=value echo abc
+abc"
+#test_assert_equal "$(<"$OUT_TMP")" "abc"
+test_assert_rc 0 test -s "$OUT_TMP"
+
+test_case log_cmd_nostatus_shell
+test_assert_equal "$(log_cmd_nostatus_shell VAR="value 2" echo "abc")" "    $ VAR='value 2' echo abc
+abc"
+#test_assert_equal "$(<"$OUT_TMP")" "abc"
+test_assert_rc 0 test -s "$OUT_TMP"
+
+test_case log_cmd_shell
+test_assert_equal "$(log_cmd_shell VAR=value echo "abc")" "    $ VAR=value echo abc
+abc"
+#test_assert_equal "$(<"$OUT_TMP")" "abc"
+test_assert_rc 0 test -s "$OUT_TMP"
+
+test_case log_cmd_shell
+test_assert_equal "$(log_cmd_shell VAR="value 2" echo "abc")" "    $ VAR='value 2' echo abc
+abc"
+#test_assert_equal "$(<"$OUT_TMP")" "abc"
+test_assert_rc 0 test -s "$OUT_TMP"
+
+test_case log_cmd_shell
+test_assert_not_equal "$(pwd)" "$OUT_TMP_DIR"
+test_assert_equal "$(log_cmd_shell cd "$OUT_TMP_DIR" ; echo PWD=$(pwd))" "    $ cd $(quote_args "$OUT_TMP_DIR")
+
+PWD=$OUT_TMP_DIR"
+
+test_case log_cmd_dryrun
+test_assert_equal "$(log_cmd_dryrun echo "abc")" "    $ echo abc           DRYRUN"
+test_assert_rc 1 test -s "$OUT_TMP"
+
+OPT_DRYRUN=false
+test_case test_cmd_dryrun-$OPT_DRYRUN
+test_assert_equal "$(test_cmd_dryrun log_cmd echo "abc")" "    $ echo abc           OK"
+test_assert_equal "$(<"$OUT_TMP")" "abc"
+
+OPT_DRYRUN=true
+test_case test_cmd_dryrun-$OPT_DRYRUN
+test_assert_equal "$(test_cmd_dryrun log_cmd echo "abc")" "    $ echo abc           DRYRUN"
+test_assert_rc 1 test -s "$OUT_TMP"
+
+unset OPT_DRYRUN
+
+setup_tty_colors
+
+rm "$OUT_TMP"
+rmdir "$OUT_TMP_DIR"
+unset OUT_TMP

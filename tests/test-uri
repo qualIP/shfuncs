@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# Copyright © 2021 qualIP Software
+#
+# This file is part of shfuncs:
+#
+#     https://github.com/qualIP/shfuncs
+#
+# shfuncs is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3.0 of the License, or (at your option)
+# any later version.
+#
+# shfuncs is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with shfuncs; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+set -euo pipefail
+
+shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+. "$shfuncs_dir/func-test.sh"
+. "$shfuncs_dir/func-uri.sh"
+
+test_case make_url
+test_assert_equal "$(make_url www.qualipsoft.com/test)" "www.qualipsoft.com/test"
+test_assert_equal "$(make_url www.qualipsoft.com/test x 1 y 2 z " ")" "www.qualipsoft.com/test?x=1&y=2&z=+"
+
+test_case get_query_var
+test_assert_equal "$(QUERY_STRING= get_query_var)" ""
+test_assert_equal "$(QUERY_STRING="x=1&y=2&z=+" get_query_var)" "x=1&y=2&z= "
+test_assert_equal "$(QUERY_STRING="x=1&y=2&z=+" get_query_var x)" "1"
+test_assert_equal "$(QUERY_STRING="x=1&y=2&z=+" get_query_var y)" "2"
+test_assert_equal "$(QUERY_STRING="x=1&y=2&z=+" get_query_var z)" " "
+
+test_case encode_html
+test_assert_equal "$(encode_html "")" ""
+test_assert_equal "$(encode_html "abc")" "abc"
+test_assert_equal "$(encode_html "a bc")" "a bc"
+test_assert_equal "$(encode_html "a&bc")" "a&amp;bc"
+test_assert_equal "$(encode_html "a<b>c")" "a&lt;b&gt;c"
+test_assert_equal "$(encode_html "a\"b'c")" "a&#34;b&#39;c"
+
+test_case decode_html
+test_assert_equal "$(decode_html "")" ""
+test_assert_equal "$(decode_html "abc")" "abc"
+test_assert_equal "$(decode_html "a&amp;b&#38;c")" "a&b&c"
+test_assert_equal "$(decode_html "a&lt;b&gt;c")" "a<b>c"
+test_assert_equal "$(decode_html "a&#34;b&#39;c")" "a\"b'c"
+test_assert_equal "$(decode_html "a&nbsp;bc")" "a bc"
+
+test_case encode_pct
+test_assert_equal "$(encode_pct "")" ""
+test_assert_equal "$(encode_pct "abc")" "abc"
+test_assert_equal "$(encode_pct "a bc")" "a+bc"
+test_assert_equal "$(encode_pct "a&bc")" "a%26bc"
+test_assert_equal "$(encode_pct "a<b>c")" "a<b>c"
+test_assert_equal "$(encode_pct "a\"b'c")" "a\"b%27c"
+test_assert_equal "$(encode_pct "a%b/c")" "a%25b%2Fc"
+test_assert_equal "$(encode_pct "a(b)c")" "a%28b%29c"
+test_assert_equal "$(encode_pct "a:b=c")" "a%3Ab%3Dc"
+
+test_case decode_pct
+test_assert_equal "$(decode_pct "")" ""
+test_assert_equal "$(decode_pct "abc")" "abc"
+test_assert_equal "$(decode_pct "a+bc")" "a bc"
+test_assert_equal "$(decode_pct "a%0Db%0Ac")" "a b c"
+test_assert_equal "$(decode_pct "a%26bc")" "a&bc"
+test_assert_equal "$(decode_pct "a<b>c")" "a<b>c"
+test_assert_equal "$(decode_pct "a\"b%27c")" "a\"b'c"
+test_assert_equal "$(decode_pct "a%25b%2Fc")" "a%b/c"
+test_assert_equal "$(decode_pct "a%28b%29c")" "a(b)c"
+test_assert_equal "$(decode_pct "a%3Ab%3Dc")" "a:b=c"

@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Copyright © 2021 qualIP Software
+#
+# This file is part of shfuncs:
+#
+#     https://github.com/qualIP/shfuncs
+#
+# shfuncs is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3.0 of the License, or (at your option)
+# any later version.
+#
+# shfuncs is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with shfuncs; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+set -euo pipefail
+
+shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+. "$shfuncs_dir/func-test.sh"
+. "$shfuncs_dir/func-assert.sh"
+
+test_case assert_file_exists
+test_assert_rc 0 assert_file_exists "$shfuncs_dir/func-assert.sh"
+test_assert_rc 0 assert_file_exists "$shfuncs_dir/"
+test_assert_rc $ENOENT assert_file_exists /does/not/exist
+
+test_case assert_file_not_exists
+test_assert_rc $EEXIST assert_file_not_exists "$shfuncs_dir/func-assert.sh"
+test_assert_rc $EEXIST assert_file_not_exists "$shfuncs_dir/"
+test_assert_rc 0 assert_file_not_exists /does/not/exist
+
+test_case assert_is_file
+test_assert_rc 0 assert_is_file "$shfuncs_dir/func-assert.sh"
+test_assert_rc $EISDIR assert_is_file "$shfuncs_dir/"
+test_assert_rc $ENOENT assert_is_file /does/not/exist
+
+test_case assert_is_directory
+test_assert_rc $ENOENT assert_is_directory "$shfuncs_dir/func-assert.sh"
+test_assert_rc 0 assert_is_directory "$shfuncs_dir/"
+test_assert_rc $ENOENT assert_is_directory /does/not/exist

@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Copyright © 2021 qualIP Software
+#
+# This file is part of shfuncs:
+#
+#     https://github.com/qualIP/shfuncs
+#
+# shfuncs is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3.0 of the License, or (at your option)
+# any later version.
+#
+# shfuncs is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with shfuncs; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+set -euo pipefail
+
+shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+. "$shfuncs_dir/func-test.sh"
+. "$shfuncs_dir/func-args.sh"
+
+test_case quote_args
+test_assert_equal "$(quote_args "" a "b c" "e \"f")" "'' a 'b c' 'e \"f'"
+test_assert_equal "$(quote_args "" a "b c" "e \"f" --arg)" "'' a 'b c' 'e \"f' --arg"
+test_assert_equal "$(quote_args "" a "b c" "e \"f" --arg=value)" "'' a 'b c' 'e \"f' --arg=value"
+test_assert_equal "$(quote_args "" a "b c" "e \"f" --arg=va\$ue)" "'' a 'b c' 'e \"f' --arg='va\$ue'"
+test_assert_equal "$(quote_args VAR="value 2")" "VAR='value 2'"
+
+test_case dquote_args
+test_assert_equal "$(dquote_args "" a "b c" "e \"f")" "\"\" a \"b c\" \"e \\\"f\""
+test_assert_equal "$(dquote_args "" a "b c" "e \"f" --arg)" "\"\" a \"b c\" \"e \\\"f\" --arg"
+test_assert_equal "$(dquote_args "" a "b c" "e \"f" --arg=value)" "\"\" a \"b c\" \"e \\\"f\" --arg=value"
+test_assert_equal "$(dquote_args "" a "b c" "e \"f" --arg=va\$ue)" "\"\" a \"b c\" \"e \\\"f\" --arg=\"va\\\$ue\""
+test_assert_equal "$(dquote_args VAR="value 2")" "VAR=\"value 2\""

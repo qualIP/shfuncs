@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -e
+
+shfuncs_dir=$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/.." && pwd)
+. "$shfuncs_dir/func-screen.sh"
+
+screen_set_title "$@"
