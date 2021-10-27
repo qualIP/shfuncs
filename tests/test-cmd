@@ -124,7 +124,7 @@ test_assert_rc 0 test -s "$OUT_TMP"
 
 test_case log_cmd_shell
 test_assert_not_equal "$(pwd)" "$OUT_TMP_DIR"
-test_assert_equal "$(log_cmd_shell cd "$OUT_TMP_DIR" ; echo PWD=$(pwd))" "    $ cd $(quote_args "$OUT_TMP_DIR")
+test_assert_equal "$(log_cmd_shell cd "$OUT_TMP_DIR" ; echo "PWD=$(pwd)")" "    $ cd $(quote_args "$OUT_TMP_DIR")
 
 PWD=$OUT_TMP_DIR"
 

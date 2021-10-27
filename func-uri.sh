@@ -36,7 +36,7 @@ make_url() {
 ## get_query_var [var]
 get_query_var() {
     if [ -n "${1:-}" ] ; then
-        decode_pct "$(${SED:-sed} -n -e 's/^\(.*&\)\?'$1'=\([^&]*\).*$/\2/p' <<< "$QUERY_STRING")"
+        decode_pct "$(${SED:-sed} -n -e 's/^\(.*&\)\?'"$1"'=\([^&]*\).*$/\2/p' <<< "$QUERY_STRING")"
     else
         decode_pct "$QUERY_STRING"
     fi

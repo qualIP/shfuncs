@@ -75,14 +75,14 @@ join_list() {
 lprepend() {
     local var="$1" ; shift 1
     local val="$*${!var:+ }${!var}"
-    eval $var="'$val'"
+    eval "$var"="'$val'"
 }
 alias lpush=lprepend
 
 lappend() {
     local var="$1" ; shift 1
     local val="${!var}${!var:+ }$*"
-    eval $var="'$val'"
+    eval "$var"="'$val'"
 }
 
 lpop() {
@@ -90,8 +90,8 @@ lpop() {
     local outvar=lpop_value ; [ -n "$2" ] && outvar="$2"
     set -- ${!var}
     [ $# = 0 ] && return 1
-    eval $outvar="$1" ; shift 1
-    eval $var="'$*'"
+    eval "$outvar"="$1" ; shift 1
+    eval "$var"="'$*'"
 }
 
 lindex() {
@@ -105,7 +105,7 @@ lindex() {
             :
             ;;
     esac
-    if [ $shift_cnt -ge 0 -a $shift_cnt -lt $# ] ; then
+    if [[ $shift_cnt -ge 0 ]] && [[ $shift_cnt -lt $# ]] ; then
         shift $shift_cnt
         echo "$1"
     fi
@@ -114,12 +114,12 @@ lindex() {
 lcontain() {
     local el="$1" ; shift
     local v
-    for v in $* ; do [ "$v" != "$el" ] || return 0 ; done
+    for v in $* ; do [[ "$v" != "$el" ]] || return 0 ; done
     return 1
 }
 
 lrmdupes() {
-    local l= v
+    local l='' v
     for v in "$@" ; do
         lcontain "$v" $l || l="$l $v"
     done
@@ -133,7 +133,7 @@ lrmdupes() {
 lsubst() {
     local from="$1" ; shift
     local to="$1" ; shift
-    local ret= v
+    local ret='' v
     for v in $* ; do
         [ "$v" = "$from" ] && v="$to"
         ret="$ret $v"

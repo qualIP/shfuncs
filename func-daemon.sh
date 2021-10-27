@@ -21,6 +21,8 @@ if [ -z "$BASH_VERSION" ] ; then echo Not running bash! >&2 ; exit 1 ; fi
 
 declare -F daemonize > /dev/null && return
 
+_daemonize_pid=
+
 # redirect tty stdin/stdout/stderr to /dev/null
 redirect-tty-std() {
     if [[ -t 0 ]] ; then exec </dev/null ; fi
@@ -47,6 +49,7 @@ close-fds() {
 
 # full daemonization of external command with setsid
 daemonize() {
+    _daemonize_pid=
     (                    # 1. fork
         redirect-tty-std # 2.1. redirect tty stdin/stdout/stderr before setsid
         cd /             # 3. ensure cwd isn't a mounted fs
@@ -59,6 +62,7 @@ daemonize() {
 
 # daemonize without setsid, keeps the child in the jobs table
 daemonize-job() {
+    _daemonize_pid=
     (                    # 1. fork
         redirect-tty-std # 2.2.1. redirect tty stdin/stdout/stderr
         trap '' 1 2      # 2.2.2. guard against HUP and INT (in child)

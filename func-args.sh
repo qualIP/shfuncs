@@ -28,7 +28,7 @@ _qip_func_args_saved_state=""
 shopt -q extglob || _qip_func_args_saved_state+="shopt -u extglob"$'\n' ; shopt -s extglob
 
 quote_args() {
-    local ret= arg sfx
+    local ret='' arg sfx
     # quote commas!
     for arg in "$@" ; do
         case "x$arg" in
@@ -36,7 +36,7 @@ quote_args() {
                 arg="''"
                 ;;
             x+([A-Za-z0-9/@%:._=+-]))
-                arg="$arg"
+                :# arg="$arg"
                 ;;
             x--+([A-Za-z0-9_-])=*) ;&
             x+([A-Za-z0-9_])=*)
@@ -53,7 +53,7 @@ quote_args() {
 }
 
 dquote_args() {
-    local ret= arg
+    local ret='' arg
     # quote commas!
     for arg in "$@" ; do
         case "x$arg" in
@@ -61,7 +61,7 @@ dquote_args() {
                 arg='""'
                 ;;
             x+([A-Za-z0-9/@%:._=+-]))
-                arg="$arg"
+                :# arg="$arg"
                 ;;
             x--+([A-Za-z0-9_-])=*) ;&
             x+([A-Za-z0-9_])=*)

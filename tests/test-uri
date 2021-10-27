@@ -30,7 +30,7 @@ test_assert_equal "$(make_url www.qualipsoft.com/test)" "www.qualipsoft.com/test
 test_assert_equal "$(make_url www.qualipsoft.com/test x 1 y 2 z " ")" "www.qualipsoft.com/test?x=1&y=2&z=+"
 
 test_case get_query_var
-test_assert_equal "$(QUERY_STRING= get_query_var)" ""
+test_assert_equal "$(QUERY_STRING="" get_query_var)" ""
 test_assert_equal "$(QUERY_STRING="x=1&y=2&z=+" get_query_var)" "x=1&y=2&z= "
 test_assert_equal "$(QUERY_STRING="x=1&y=2&z=+" get_query_var x)" "1"
 test_assert_equal "$(QUERY_STRING="x=1&y=2&z=+" get_query_var y)" "2"

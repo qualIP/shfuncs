@@ -40,7 +40,7 @@ expand_glob_pattern() {
     local v
     for v in "$@" ; do
         case "$v" in
-            $pat) echo $v ;;
+            $pat) echo "$v" ;;
         esac
     done
 }

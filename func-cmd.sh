@@ -29,7 +29,7 @@ declare -F log_cmd > /dev/null && return
 # stdout is indented then sent to stdout.
 # stderr is not redirected.
 run_indent() {
-    local state=$(set +o) ; shopt -qo errexit && state="$state ; set -e"
+    local state ; state=$(set +o) ; shopt -qo errexit && state="$state ; set -e"
     set -o pipefail
     if "$@" | indent
     then local rc=0 ; else local rc=$? ; fi
@@ -44,7 +44,7 @@ run_indent() {
 # Indentation supports reformatting terminal escape sequences.
 # stderr is not redirected.
 run_indent_esc() {
-    local state=$(set +o) ; shopt -qo errexit && state="$state ; set -e"
+    local state ; state=$(set +o) ; shopt -qo errexit && state="$state ; set -e"
     set -o pipefail
     if "$@" | indent_esc
     then local rc=0 ; else local rc=$? ; fi
@@ -67,7 +67,7 @@ run_cmd_redirected() {
 # stdout and stderr are both copied to file and output on stdout.
 run_cmd_piped() {
     local file="$1" ; shift
-    local state=$(set +o) ; shopt -qo errexit && state="$state ; set -e"
+    local state ; state=$(set +o) ; shopt -qo errexit && state="$state ; set -e"
     set -o pipefail
     if { "$@" ; } | tee "$file" 2>&1
     then local rc=0 ; else local rc=$? ; fi
@@ -86,18 +86,18 @@ _run_script_version=
 ## run_cmd_piped_pty file cmd ...
 run_cmd_piped_pty() {
     local file="$1" ; shift
-    local cmd=$(quote_args "$@")
+    local cmd ; cmd=$(quote_args "$@")
     local rows=
     local cols=
     local colcmd=
-    local stty_size=$(stty size 2>/dev/null || true)
-    read rows cols <<<$stty_size
+    local stty_size ; stty_size=$(stty size 2>/dev/null || true)
+    read -r rows cols <<<"$stty_size"
 _fix_vim_highlighting() {
 <$stty_size
 }
     if [[ -n "$cols" ]] ; then
         colcmd="export LINES=$rows COLUMNS=$(( cols - 4 )) ; stty rows $rows cols $(( cols - 4 )) ;"
-        stty rows $rows cols $(( cols - 4 ))
+        stty rows "$rows" cols "$(( cols - 4 ))"
     fi
     if [[ -z "$_run_script_version" ]] ; then
         if { script --version 2>&1 || true ; } | grep -q util-linux ; then
@@ -115,7 +115,7 @@ _fix_vim_highlighting() {
         then local rc=0 ; else local rc=$? ; fi
     fi
     if [[ -n "$cols" ]] ; then
-        stty rows $rows cols $cols
+        stty rows "$rows" cols "$cols"
     fi
     return $rc
 }
@@ -128,7 +128,7 @@ _fix_vim_highlighting() {
 # On error or verbose: Output is printed
 log_cmd() {
     local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
-    local cmd=$(quote_args "$@")
+    local cmd ; cmd=$(quote_args "$@")
     print_need_nl
     if run_indent run_cmd_redirected "$loc_OUT_TMP" "$@"
     then local rc=0 ; else local rc=$? ; fi
@@ -140,11 +140,11 @@ log_cmd() {
     fi
     if [[ $rc != 0 ]] ; then
         if [[ -s "$loc_OUT_TMP" ]] ; then
-            print_err "$(<$loc_OUT_TMP)"
+            print_err "$(<"$loc_OUT_TMP")"
         fi
     elif $OPT_VERBOSE ; then
         if [[ -s "$loc_OUT_TMP" ]] ; then
-            print_dbg "$(<$loc_OUT_TMP)"
+            print_dbg "$(<"$loc_OUT_TMP")"
         fi
     fi
     [[ "$loc_OUT_TMP" = "${OUT_TMP:-}" ]] || rm -f "$loc_OUT_TMP"
@@ -160,7 +160,7 @@ log_cmd() {
 # On error or verbose: Output is printed
 log_cmd_long() {
     local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
-    local cmd=$(quote_args "$@")
+    local cmd ; cmd=$(quote_args "$@")
     print_need_nl
     print_cmd_status "$cmd" ...
     if run_indent run_cmd_redirected "$loc_OUT_TMP" "$@"
@@ -177,12 +177,12 @@ log_cmd_long() {
     fi
     if [[ $rc != 0 ]] ; then
         if [[ -s "$loc_OUT_TMP" ]] ; then
-            print_err "$(<$loc_OUT_TMP)"
+            print_err "$(<"$loc_OUT_TMP")"
         fi
     elif $OPT_VERBOSE ; then
         if false ; then
             if [[ -s "$loc_OUT_TMP" ]] ; then
-                print_dbg "$(<$loc_OUT_TMP)"
+                print_dbg "$(<"$loc_OUT_TMP")"
             fi
         fi
     fi
@@ -198,7 +198,7 @@ log_cmd_long() {
 # Status is printed on error only.
 log_cmd_live() {
     local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
-    local cmd=$(quote_args "$@")
+    local cmd ; cmd=$(quote_args "$@")
     print_need_nl
     print_cmd_status "$cmd"
     if run_indent run_cmd_piped "$loc_OUT_TMP" "$@"
@@ -215,7 +215,7 @@ log_cmd_live() {
 
 log_cmd_live_nohup() {
     local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
-    local cmd=$(quote_args "$@")
+    local cmd ; cmd=$(quote_args "$@")
     print_need_nl
     print_cmd_status "$cmd"
     if run_indent run_cmd_piped_nohup "$loc_OUT_TMP" "$@"
@@ -238,7 +238,7 @@ log_cmd_live_nohup() {
 # Status is printed on error only.
 log_cmd_live_pty() {
     local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
-    local cmd=$(quote_args "$@")
+    local cmd ; cmd=$(quote_args "$@")
     print_need_nl
     print_cmd_status "$cmd"
     if run_indent_esc run_cmd_piped_pty "$loc_OUT_TMP" "$@"
@@ -260,7 +260,7 @@ log_cmd_live_pty() {
 # Output is send to stdout.
 # Interactive mode is uncaptured and unindented.
 log_cmd_nostatus() {
-    local cmd=$(quote_args "$@")
+    local cmd ; cmd=$(quote_args "$@")
     print_need_nl
     print_cmd_status "$cmd"
     if run_indent "$@"
@@ -276,7 +276,7 @@ log_cmd_nostatus() {
 # Output is send to stdout.
 # Interactive mode is uncaptured and unindented.
 log_cmd_nostatus_interactive() {
-    local cmd=$(quote_args "$@")
+    local cmd ; cmd=$(quote_args "$@")
     print_need_nl
     print_cmd_status "$cmd"
     if "$@"
@@ -295,7 +295,7 @@ log_cmd_interactive() {
     if log_cmd_nostatus_interactive "$@"
     then local rc=0 ; else local rc=$? ; fi
     if [[ $rc != 0 ]] ; then
-        local cmd=$(quote_args "$@")
+        local cmd ; cmd=$(quote_args "$@")
         print_cmd_status "$cmd" ERROR "($rc)"
     else
         : # print_cmd_status "$cmd" OK
@@ -311,7 +311,7 @@ log_cmd_interactive() {
 # Output is send to stdout.
 # Shell mode is uncaptured and unindented.
 log_cmd_nostatus_shell() {
-    local cmd=$(quote_args "$@")
+    local cmd ; cmd=$(quote_args "$@")
     print_need_nl
     print_cmd_status "$cmd"
     # Using "$cmd" instead of "$@" because eval concatenates spaces
@@ -329,7 +329,7 @@ log_cmd_shell() {
     if log_cmd_nostatus_shell "$@"
     then local rc=0 ; else local rc=$? ; fi
     if [[ $rc != 0 ]] ; then
-        local cmd=$(quote_args "$@")
+        local cmd ; cmd=$(quote_args "$@")
         print_cmd_status "$cmd" ERROR "($rc)"
     else
         : # print_cmd_status "$cmd" OK
@@ -356,7 +356,7 @@ test_cmd_dryrun() {
 # it.
 log_cmd_dryrun() {
     local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
-    local cmd=$(quote_args "$@")
+    local cmd ; cmd=$(quote_args "$@")
     print_need_nl
     print_cmd_status "$cmd" DRYRUN
     local rc=0

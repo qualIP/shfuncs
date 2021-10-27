@@ -23,14 +23,14 @@ declare -F fix_path_no_slash > /dev/null && return
 
 ## fix_path_no_slash path
 fix_path_no_slash() {
-    local d="$(dirname "$1/dummy")"
+    local d ; d="$(dirname "$1/dummy")"
     [[ "$d" = "/" ]] || d="${d%/}" ;# cover special case of dirname / -> /
     echo "$d"
 }
 
 ## fix_path path
 fix_path() {
-    local d="$(fix_path_no_slash "$1")"
+    local d ; d="$(fix_path_no_slash "$1")"
     [[ "$d" = "/" ]] || d="$d/"
     echo "$d"
 }
@@ -45,5 +45,5 @@ find_in_dir() {
         esac
     done
     local dir=$1 ; shift
-    (cd $dir && ${FIND:-find} $opt . "$@") | ${SED:-sed} -e "s@^\./@$dir/@" -e "s@///*@/@g"
+    (cd "$dir" && "${FIND:-find}" $opt . "$@") | ${SED:-sed} -e "s@^\./@$dir/@" -e "s@///*@/@g"
 }

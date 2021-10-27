@@ -73,8 +73,8 @@ findexec() {
 next_in_path() {
     local bin="$1" ; shift
     local pathenv="${1:-$PATH}"
-    local binname=$(basename "$bin")
-    local bindir=$(cd "$(dirname "$bin")" && pwd)
+    local binname ; binname=$(basename "$bin")
+    local bindir ; bindir=$(cd "$(dirname "$bin")" && pwd)
     local bindir_found=false
     local p
     local old_IFS="$IFS" ; IFS=":"
@@ -104,7 +104,7 @@ next_in_path() {
 _realpath() {
     local f d d1 d2
     local p=$1
-    local l=$(readlink "$p")
+    local l ; l=$(readlink "$p")
     if [ -n "$l" ] ; then
         d1=$(dirname "$p")
         d2=$(dirname "$l")

@@ -151,9 +151,9 @@ print_status() {
         +([A-Z-])) c=${cRED:-}           ;;
     esac
     if [[ -n "$s" ]] ; then
-        _print_status_internal $n $nosep "$t" "${c}${b}$s${b:+${cbOFF}}${c:+${cOFF:-}}" "$@"
+        _print_status_internal "$n" $nosep "$t" "${c}${b}$s${b:+${cbOFF}}${c:+${cOFF:-}}" "$@"
     else
-        _print_status_internal $n $nosep "$t" "" "$@"
+        _print_status_internal "$n" $nosep "$t" "" "$@"
     fi
 }
 
@@ -169,7 +169,8 @@ print_cmd_status() {
     esac
     local t="$1" ; shift
     local s="${1:-}" ; shift || true
-    print_status $n $nosep "\$ $t" "$s" "$@" | indent
+    print_status "$n" $nosep "\$ $t" "$s" "$@" | indent
+    _last_print_is_nl=false
 }
 
 ## print_value [-n] [--nosep] "name" ["value"...]
@@ -183,7 +184,7 @@ print_value() {
         --nosep) nosep=$1 ; shift 1 ;;
     esac
     local t="$1" ; shift
-    _print_status_internal $n $nosep "$t" "" "$@"
+    _print_status_internal "$n" $nosep "$t" "" "$@"
 }
 
 # Shell-like Printing
@@ -191,17 +192,17 @@ print_value() {
 _print_shell_type=
 
 print_var_csh() {
-    print set $1=`quote_args "$2"`
+    print set "$1"="$(quote_args "$2")"
 }
 print_var_sh() {
-    print $1=`quote_args "$2"`
+    print "$1"="$(quote_args "$2")"
 }
 
 print_source_csh() {
-    print source `quote_args "$1"`
+    print source "$(quote_args "$1")"
 }
 print_source_sh() {
-    print . `quote_args "$1"`
+    print . "$(quote_args "$1")"
 }
 
 set_print_shell_type() {
