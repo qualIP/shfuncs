@@ -80,3 +80,5 @@ dquote_args() {
 }
 
 eval "$_qip_func_args_saved_state" ; unset _qip_func_args_saved_state
+
+# vim: ft=bash

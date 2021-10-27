@@ -44,3 +44,5 @@ expand_glob_pattern() {
         esac
     done
 }
+
+# vim: ft=bash

@@ -164,3 +164,5 @@ lsort() {
     sort <<<"$*"
     IFS="$old_IFS"
 }
+
+# vim: ft=bash

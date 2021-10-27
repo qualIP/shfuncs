@@ -81,3 +81,5 @@ git_dir() {
 git_toplevel() {
     git rev-parse --show-toplevel
 }
+
+# vim: ft=bash

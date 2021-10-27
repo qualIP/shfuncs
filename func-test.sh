@@ -60,3 +60,5 @@ test_assert_rc() {
     "$@" || rc=$?
     test_assert_equal "$rc" "$exp_rc" "\"$*\""
 }
+
+# vim: ft=bash

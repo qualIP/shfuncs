@@ -46,3 +46,5 @@ screen_set_title() {
         /bin/echo -n -e '\033]0;'"$*"'\007'
     fi
 }
+
+# vim: ft=bash

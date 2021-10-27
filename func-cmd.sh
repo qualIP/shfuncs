@@ -92,9 +92,6 @@ run_cmd_piped_pty() {
     local colcmd=
     local stty_size ; stty_size=$(stty size 2>/dev/null || true)
     read -r rows cols <<<"$stty_size"
-_fix_vim_highlighting() {
-<$stty_size
-}
     if [[ -n "$cols" ]] ; then
         colcmd="export LINES=$rows COLUMNS=$(( cols - 4 )) ; stty rows $rows cols $(( cols - 4 )) ;"
         stty rows "$rows" cols "$(( cols - 4 ))"
@@ -363,3 +360,5 @@ log_cmd_dryrun() {
     :> "$loc_OUT_TMP"
     return $rc
 }
+
+# vim: ft=bash

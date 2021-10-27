@@ -252,3 +252,5 @@ assert_is_directory() {
         return $EOK
     fi
 }
+
+# vim: ft=bash

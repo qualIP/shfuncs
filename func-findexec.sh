@@ -122,3 +122,5 @@ _realpath() {
 if [ ! -f "$(my_which realpath 2> /dev/null)" ] ; then
     alias realpath=_realpath
 fi
+
+# vim: ft=bash

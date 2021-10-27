@@ -265,3 +265,5 @@ print_li() {
 }
 
 eval "$_qip_func_print_saved_state" ; unset _qip_func_print_saved_state
+
+# vim: ft=bash

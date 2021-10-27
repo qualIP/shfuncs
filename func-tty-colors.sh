@@ -142,3 +142,5 @@ setup_tty_colors() {
     fi
 }
 setup_tty_colors
+
+# vim: ft=bash

@@ -78,3 +78,5 @@ daemonize-job() {
     _daemonize_pid=$!
     disown -h $!       # 2.2.3. guard against HUP (in parent)
 }
+
+# vim: ft=bash

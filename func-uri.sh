@@ -96,3 +96,5 @@ decode_pct() {
     s@%3D@=@g
     ' <<< "$*"
 }
+
+# vim: ft=bash

@@ -47,3 +47,5 @@ find_in_dir() {
     local dir=$1 ; shift
     (cd "$dir" && "${FIND:-find}" $opt . "$@") | ${SED:-sed} -e "s@^\./@$dir/@" -e "s@///*@/@g"
 }
+
+# vim: ft=bash

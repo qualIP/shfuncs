@@ -105,3 +105,5 @@ with_OUT_TMP() {
 beep() {
     echo -n   ;# beep!
 }
+
+# vim: ft=bash
