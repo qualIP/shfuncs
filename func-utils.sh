@@ -101,3 +101,7 @@ with_OUT_TMP() {
     fi
     return $rc
 }
+
+beep() {
+    echo -n   ;# beep!
+}
