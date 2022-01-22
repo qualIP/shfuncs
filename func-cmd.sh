@@ -61,6 +61,16 @@ run_cmd_redirected() {
     "$@" 2> "$file" 1>&2
 }
 
+## run_cmd_redirected_nohup file cmd ...
+#
+# Executes the command immune to hangups.
+# stdout and stderr are both redirected to file.
+run_cmd_redirected_nohup() {
+    local file="$1" ; shift
+    # This is not ideal, would be best in a subshell?
+    run_cmd_redirected "$file" nohup "$@" < /dev/null
+}
+
 ## run_cmd_piped file cmd ...
 #
 # Executes the command.
@@ -76,10 +86,13 @@ run_cmd_piped() {
 }
 
 ## run_cmd_piped_nohup file cmd ...
+#
+# Executes the command immune to hangups.
+# stdout and stderr are both copied to file and output on stdout.
 run_cmd_piped_nohup() {
     local file="$1" ; shift
     # This is not ideal, would be best in a subshell?
-    run_cmd_piped "$file" nohup "$@"
+    run_cmd_piped "$file" nohup "$@" < /dev/null
 }
 
 _run_script_version=

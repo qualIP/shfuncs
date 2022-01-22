@@ -41,6 +41,10 @@ test_case run_cmd_redirected
 test_assert_equal "$(run_cmd_redirected "$OUT_TMP" echo "abc")" ""
 test_assert_equal "$(<"$OUT_TMP")" "abc"
 
+test_case run_cmd_redirected_nohup
+test_assert_equal "$(run_cmd_redirected_nohup "$OUT_TMP" echo "abc")" ""
+test_assert_equal "$(<"$OUT_TMP")" "abc"
+
 test_case run_cmd_piped
 test_assert_equal "$(run_cmd_piped "$OUT_TMP" echo "abc")" "abc"
 test_assert_equal "$(<"$OUT_TMP")" "abc"
