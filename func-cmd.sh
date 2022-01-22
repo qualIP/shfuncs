@@ -147,12 +147,12 @@ run_cmd_piped_pty() {
 # Logs and executes the command.
 # Output is redirected to OUT_TMP.
 # Status is printed on same line as command.
-# On error or verbose: Output is printed
+# On error or verbose: Output is printed.
 log_cmd() {
     local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
     local cmd ; cmd=$(quote_args "$@")
     print_need_nl
-    if run_indent run_cmd_redirected "$loc_OUT_TMP" "$@"
+    if run_cmd_redirected "$loc_OUT_TMP" "$@"
     then local rc=0 ; else local rc=$? ; fi
     #print_nl
     if [[ $rc != 0 ]] ; then
@@ -162,11 +162,11 @@ log_cmd() {
     fi
     if [[ $rc != 0 ]] ; then
         if [[ -s "$loc_OUT_TMP" ]] ; then
-            print_err "$(<"$loc_OUT_TMP")"
+            print_err "$(<"$loc_OUT_TMP")" |& indent >&2
         fi
     elif $OPT_VERBOSE ; then
         if [[ -s "$loc_OUT_TMP" ]] ; then
-            print_dbg "$(<"$loc_OUT_TMP")"
+            print_dbg "$(<"$loc_OUT_TMP")" |& indent >&2
         fi
     fi
     [[ "$loc_OUT_TMP" = "${OUT_TMP:-}" ]] || rm -f "$loc_OUT_TMP"
@@ -179,13 +179,13 @@ log_cmd() {
 # Continuation dots are printed first.
 # Output is redirected to OUT_TMP.
 # Status is printed on new line upon completion.
-# On error or verbose: Output is printed
+# On error or verbose: Output is printed.
 log_cmd_long() {
     local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
     local cmd ; cmd=$(quote_args "$@")
     print_need_nl
     print_cmd_status "$cmd" ...
-    if run_indent run_cmd_redirected "$loc_OUT_TMP" "$@"
+    if run_cmd_redirected "$loc_OUT_TMP" "$@"
     then local rc=0 ; else local rc=$? ; fi
     #print_nl
     if [[ $rc != 0 ]] ; then
@@ -199,12 +199,12 @@ log_cmd_long() {
     fi
     if [[ $rc != 0 ]] ; then
         if [[ -s "$loc_OUT_TMP" ]] ; then
-            print_err "$(<"$loc_OUT_TMP")"
+            print_err "$(<"$loc_OUT_TMP")" |& indent >&2
         fi
     elif $OPT_VERBOSE ; then
         if false ; then
             if [[ -s "$loc_OUT_TMP" ]] ; then
-                print_dbg "$(<"$loc_OUT_TMP")"
+                print_dbg "$(<"$loc_OUT_TMP")" |& indent >&2
             fi
         fi
     fi

@@ -48,10 +48,17 @@ print_need_nl() {
     ${_last_print_is_nl:-false} || print ""
 }
 
+## indent [file ...]
+#
+# Indent the content of standard input or the given file names.
 indent() {
-    sed -e 's/^/    /'
+    sed -e 's/^/    /' "$@"
 }
 
+## indent_esc [file ...]
+#
+# Indent the content of standard input or the given file names.
+# Supports basic terminal escape sequences.
 indent_esc() {
     ${PERL:-perl} -lpe '
     BEGIN {
@@ -60,7 +67,7 @@ indent_esc() {
     s/^/    / ;
     s/\r([^\r\n])/\r    \1/g ;
     s/\[(\d+);(\d+)H/"[" . $1 . ";" . (inc($2)) . "H"/eg ;
-    '
+    ' "$@"
 }
 
 print_fmt() {
