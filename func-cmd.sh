@@ -275,6 +275,14 @@ log_cmd_live_pty() {
     return $rc
 }
 
+log_cmd_live_maybe_pty() {
+    if [[ "${tty_colors_mode:-off}" = "on" ]] ; then
+        log_cmd_live_pty "$@"
+    else
+        log_cmd_live "$@"
+    fi
+}
+
 ## log_cmd_nostatus [cmd ...]
 #
 # Logs and executes the command.
