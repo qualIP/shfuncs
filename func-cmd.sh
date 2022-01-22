@@ -385,12 +385,11 @@ test_cmd_dryrun() {
 # Print the command and arguments with a "DRYRUN" status, but do not execute
 # it.
 log_cmd_dryrun() {
-    local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
     local cmd ; cmd=$(quote_args "$@")
     print_need_nl
     print_cmd_status "$cmd" DRYRUN
     local rc=0
-    :> "$loc_OUT_TMP"
+    test -n "${OUT_TMP:-}" && :> "$OUT_TMP"
     return $rc
 }
 
