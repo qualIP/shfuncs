@@ -71,6 +71,14 @@ run_cmd_redirected_nohup() {
     run_cmd_redirected "$file" nohup "$@" < /dev/null
 }
 
+## run_cmd_redirected_pty file cmd ...
+#
+# Executes the command in a pseudoterminal.
+# stdout and stderr are both redirected to file.
+run_cmd_redirected_pty() {
+    run_cmd_piped_pty "$@" > /dev/null
+}
+
 ## run_cmd_piped file cmd ...
 #
 # Executes the command.
@@ -97,6 +105,9 @@ run_cmd_piped_nohup() {
 
 _run_script_version=
 ## run_cmd_piped_pty file cmd ...
+#
+# Executes the command in a pseudoterminal.
+# stdout and stderr are both copied to file and output on stdout.
 run_cmd_piped_pty() {
     local file="$1" ; shift
     local cmd ; cmd=$(quote_args "$@")
@@ -118,9 +129,10 @@ run_cmd_piped_pty() {
         fi
     fi
     if [[ "$_run_script_version" = "util-linux" ]] ; then
-        if script --flush --quiet --command "$cmd" --return "$file"
+        if script --flush --quiet --command "$colcmd$cmd" --return "$file"
         then local rc=0 ; else local rc=$? ; fi
     else
+        # TODO colcmd
         if script -F -q "$file" "$@"
         then local rc=0 ; else local rc=$? ; fi
     fi
