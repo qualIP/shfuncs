@@ -173,6 +173,28 @@ log_cmd() {
     return $rc
 }
 
+## log_cmd_quiet [cmd ...]
+#
+# Executes the command.
+# Output is redirected to OUT_TMP.
+# On error: Status is printed on same line as command.
+# On error: Output is printed.
+log_cmd_quiet() {
+    local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
+    local cmd ; cmd=$(quote_args "$@")
+    if run_cmd_redirected "$loc_OUT_TMP" "$@"
+    then local rc=0 ; else local rc=$? ; fi
+    if [[ $rc != 0 ]] ; then
+        print_need_nl
+        print_cmd_status "$cmd" ERROR "($rc)"
+        if [[ -s "$loc_OUT_TMP" ]] ; then
+            print_err "$(<"$loc_OUT_TMP")" |& indent >&2
+        fi
+    fi
+    [[ "$loc_OUT_TMP" = "${OUT_TMP:-}" ]] || rm -f "$loc_OUT_TMP"
+    return $rc
+}
+
 ## log_cmd_long [cmd ...]
 #
 # Logs and executes the command.
@@ -212,6 +234,10 @@ log_cmd_long() {
     return $rc
 }
 
+log_cmd_long_quiet() {
+    log_cmd_quiet "$@"
+}
+
 ## log_cmd_live [cmd ...]
 #
 # Logs and executes the command.
@@ -235,6 +261,10 @@ log_cmd_live() {
     return $rc
 }
 
+log_cmd_live_quiet() {
+    log_cmd_quiet "$@"
+}
+
 log_cmd_live_nohup() {
     local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
     local cmd ; cmd=$(quote_args "$@")
@@ -247,6 +277,28 @@ log_cmd_live_nohup() {
         print_cmd_status "$cmd" ERROR "($rc)"
     else
         : # print_cmd_status "$cmd" OK
+    fi
+    [[ "$loc_OUT_TMP" = "${OUT_TMP:-}" ]] || rm -f "$loc_OUT_TMP"
+    return $rc
+}
+
+## log_cmd_live_nohup_quiet [cmd ...]
+#
+# Executes the command immune to hangups.
+# Output is redirected to OUT_TMP.
+# On error: Status is printed on same line as command.
+# On error: Output is printed.
+log_cmd_live_nohup_quiet() {
+    local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
+    local cmd ; cmd=$(quote_args "$@")
+    if run_cmd_redirected_nohup "$loc_OUT_TMP" "$@"
+    then local rc=0 ; else local rc=$? ; fi
+    if [[ $rc != 0 ]] ; then
+        print_need_nl
+        print_cmd_status "$cmd" ERROR "($rc)"
+        if [[ -s "$loc_OUT_TMP" ]] ; then
+            print_err "$(<"$loc_OUT_TMP")" |& indent >&2
+        fi
     fi
     [[ "$loc_OUT_TMP" = "${OUT_TMP:-}" ]] || rm -f "$loc_OUT_TMP"
     return $rc
@@ -275,6 +327,29 @@ log_cmd_live_pty() {
     return $rc
 }
 
+## log_cmd_live_pty_quiet [cmd ...]
+#
+# Executes the command under a pseudopty.
+# No continuation dots.
+# Output is redirected to OUT_TMP.
+# On error: Status is printed on same line as command.
+# On error: Output is printed.
+log_cmd_live_pty_quiet() {
+    local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
+    local cmd ; cmd=$(quote_args "$@")
+    if run_cmd_redirected_pty "$loc_OUT_TMP" "$@"
+    then local rc=0 ; else local rc=$? ; fi
+    if [[ $rc != 0 ]] ; then
+        print_need_nl
+        print_cmd_status "$cmd" ERROR "($rc)"
+        if [[ -s "$loc_OUT_TMP" ]] ; then
+            print_err "$(<"$loc_OUT_TMP")" |& indent_esc >&2
+        fi
+    fi
+    [[ "$loc_OUT_TMP" = "${OUT_TMP:-}" ]] || rm -f "$loc_OUT_TMP"
+    return $rc
+}
+
 log_cmd_live_maybe_pty() {
     if [[ "${tty_colors_mode:-off}" = "on" ]] ; then
         log_cmd_live_pty "$@"
@@ -283,12 +358,19 @@ log_cmd_live_maybe_pty() {
     fi
 }
 
+log_cmd_live_maybe_pty_quiet() {
+    if [[ "${tty_colors_mode:-off}" = "on" ]] ; then
+        log_cmd_live_pty_quiet "$@"
+    else
+        log_cmd_live_quiet "$@"
+    fi
+}
+
 ## log_cmd_nostatus [cmd ...]
 #
 # Logs and executes the command.
 # No continuation dots.
 # Output is send to stdout.
-# Interactive mode is uncaptured and unindented.
 log_cmd_nostatus() {
     local cmd ; cmd=$(quote_args "$@")
     print_need_nl
@@ -296,6 +378,20 @@ log_cmd_nostatus() {
     if run_indent "$@"
     then local rc=0 ; else local rc=$? ; fi
     print_nl
+    return $rc
+}
+
+## log_cmd_nostatus_quiet [cmd ...]
+#
+# Executes the command.
+# Output is send to stdout.
+# On error: Status is printed on same line as command.
+log_cmd_nostatus_quiet() {
+    local cmd ; cmd=$(quote_args "$@")
+    local rc=0 ; "$@" >& /dev/null || rc=$?
+    if [ $rc != 0 ] ; then
+        print_cmd_status "$cmd" ERROR "($rc)"
+    fi
     return $rc
 }
 
@@ -315,6 +411,16 @@ log_cmd_nostatus_interactive() {
     return $rc
 }
 
+log_cmd_nostatus_interactive_quiet() {
+    local cmd ; cmd=$(quote_args "$@")
+    local rc=0 ; "$@" >& /dev/null || rc=$?
+    if [ $rc != 0 ] ; then
+        print_need_nl
+        print_cmd_status "$cmd" ERROR "($rc)"
+    fi
+    return $rc
+}
+
 ## log_cmd_interactive [cmd ...]
 #
 # Logs and executes the command with full interactive support.
@@ -326,9 +432,17 @@ log_cmd_interactive() {
     then local rc=0 ; else local rc=$? ; fi
     if [[ $rc != 0 ]] ; then
         local cmd ; cmd=$(quote_args "$@")
+        print_need_nl
         print_cmd_status "$cmd" ERROR "($rc)"
-    else
-        : # print_cmd_status "$cmd" OK
+    fi
+    return $rc
+}
+
+log_cmd_interactive_quiet() {
+    local rc=0 ; log_cmd_nostatus_interactive_quiet "$@" || rc=$?
+    if [ $rc != 0 ] ; then
+        print_need_nl
+        print_cmd_status "$cmd" ERROR "($rc)"
     fi
     return $rc
 }
@@ -351,6 +465,18 @@ log_cmd_nostatus_shell() {
     return $rc
 }
 
+log_cmd_nostatus_shell_quiet() {
+    local cmd ; cmd=$(quote_args "$@")
+    # Using "$cmd" instead of "$@" because eval concatenates spaces
+    if eval "$cmd" >& /dev/null
+    then local rc=0 ; else local rc=$? ; fi
+    if [ $rc != 0 ] ; then
+        print_need_nl
+        print_cmd_status "$cmd" ERROR "($rc)"
+    fi
+    return $rc
+}
+
 ## log_cmd_shell [cmd ...]
 #
 # Logs and executes the command in the current shell (appropriate for shell
@@ -367,6 +493,10 @@ log_cmd_shell() {
     return $rc
 }
 
+log_cmd_shell_quiet() {
+    log_cmd_nostatus_shell_quiet "$@"
+}
+
 ## test_cmd_dryrun log_cmd_func [cmd ...]
 #
 # Run `log_cmd_func cmd ...` unless OPT_DRYRUN is true in which case
@@ -374,7 +504,14 @@ log_cmd_shell() {
 test_cmd_dryrun() {
     local log_cmd_func=$1 ; shift
     if ${OPT_DRYRUN:-false} ; then
-        log_cmd_dryrun "$@"
+        if [[ "$log_cmd_func" = "test_cmd_quiet" ]] ; then
+            # Workaround to make both of these equivalent:
+            #     test_cmd_quiet test_cmd_dryrun log_cmd
+            #     test_cmd_dryrun test_cmd_quiet log_cmd
+            test_cmd_quiet log_cmd_dryrun "$@"
+        else
+            log_cmd_dryrun "$@"
+        fi
     else
         $log_cmd_func "$@"
     fi
@@ -391,6 +528,21 @@ log_cmd_dryrun() {
     local rc=0
     test -n "${OUT_TMP:-}" && :> "$OUT_TMP"
     return $rc
+}
+
+log_cmd_dryrun_quiet() {
+    # Run nothing. Print nothing.
+    # local cmd ; cmd=$(quote_args "$@")
+    test -n "${OUT_TMP:-}" && :> "$OUT_TMP"
+    return 0
+}
+
+test_cmd_quiet() {
+    local log_cmd_func=$1 ; shift
+    if ${OPT_QUIET:-false} ; then
+        log_cmd_func="${log_cmd_func}_quiet"
+    fi
+    $log_cmd_func "$@"
 }
 
 # vim: ft=bash
