@@ -30,6 +30,9 @@ shopt -q extglob || _qip_func_args_saved_state+="shopt -u extglob"$'\n' ; shopt 
 _last_print_is_nl=false
 
 ## print [str ...]
+#
+# Prints the arguments, just like `echo`.
+# Tracks newlines just like all print functions in this library.
 print() {
     local v="$*"
     echo "$v"
@@ -37,6 +40,8 @@ print() {
 }
 
 ## print_nl
+#
+# Prints a new line
 print_nl() {
     print ""
 }
@@ -52,7 +57,7 @@ print_need_nl() {
 #
 # Indent the content of standard input or the given file names.
 indent() {
-    sed -e 's/^/    /' "$@"
+    sed -e 's/^./    &/' "$@"
 }
 
 ## indent_esc [file ...]
@@ -64,12 +69,16 @@ indent_esc() {
     BEGIN {
         sub inc { my ($num) = @_; $num += 4 }
     }
-    s/^/    / ;
+    s/^(.)/    \1/ ;
     s/\r([^\r\n])/\r    \1/g ;
     s/\[(\d+);(\d+)H/"[" . $1 . ";" . (inc($2)) . "H"/eg ;
     ' "$@"
 }
 
+## print_fmt color_code format args...
+#
+# Prints the format and arguments like printf, prepending an optional color
+# code.
 print_fmt() {
     local c=$1 ; shift
     local f=$1 ; shift
@@ -77,15 +86,22 @@ print_fmt() {
     _last_print_is_nl=false
 }
 
+## print_err error_message ...
+#
+# Prints the error message to standard error in red and with "**" markers around it.
 print_err() {
     print "${hoPRE:-}${cRED:-}** $* **${cOFF:-}${hcPRE:-}" >&2
 }
 
+#
+# Prints the debug message to standard error in yellow.
 print_dbg() {
     print "${hoPRE:-}${cYELLOW:-}$*${cOFF:-}${hcPRE:-}" >&2
 }
 
 ## print_q "q" [choices]
+#
+# Prints a question prompt. Ends with a space, not a newline.
 print_q() {
     local q=$1 ; shift
     [[ "${q: -1}" = "?" ]] || [[ "${q: -1}" = ":" ]] || q="$q:"
@@ -95,11 +111,14 @@ print_q() {
     print_fmt "${cMAGENTA:-}" "$q$choices " "$@"
 }
 
+## print_a [...]
+#
+# Print an "answer" (No special formatting).
 print_a() {
     print_status -0 "" "$@"
 }
 
-# _print_status_internal [-n] [--nosep] s ...
+## _print_status_internal [-n] [--nosep] s ...
 _print_status_internal() {
     local n=-20
     case "${1:-}" in
@@ -130,7 +149,10 @@ _print_status_internal() {
     _last_print_is_nl=false
 }
 
-# print_status [-n] [--nosep] title [status] [...]
+## print_status [-n] [--nosep] title [status] [...]
+#
+# Print a status message of the form:
+#     "title:    status ..."
 print_status() {
     local n=-20
     case "${1:-}" in
@@ -160,11 +182,14 @@ print_status() {
     if [[ -n "$s" ]] ; then
         _print_status_internal "$n" $nosep "$t" "${c}${b}$s${b:+${cbOFF}}${c:+${cOFF:-}}" "$@"
     else
-        _print_status_internal "$n" $nosep "$t" "" "$@"
+        _print_status_internal "$n" $nosep "$t" "$@"
     fi
 }
 
 ## print_cmd_status [-n] "cmd" [status] [...]
+#
+# Print a command status message in the form:
+#     "    $ cmd     status ..."
 print_cmd_status() {
     local n=-20
     case "${1:-}" in
@@ -181,6 +206,9 @@ print_cmd_status() {
 }
 
 ## print_value [-n] [--nosep] "name" ["value"...]
+#
+# Print a value in the form:
+#     "name:                value ..."
 print_value() {
     local n=-20
     case "${1:-}" in
@@ -191,17 +219,17 @@ print_value() {
         --nosep) nosep=$1 ; shift 1 ;;
     esac
     local t="$1" ; shift
-    _print_status_internal "$n" $nosep "$t" "" "$@"
+    _print_status_internal "$n" $nosep "$t" "$@"
 }
 
 # Shell-like Printing
 
 _print_shell_type=
 
-print_var_csh() {
+print_set_var_csh() {
     print set "$1"="$(quote_args "$2")"
 }
-print_var_sh() {
+print_set_var_sh() {
     print "$1"="$(quote_args "$2")"
 }
 
@@ -217,13 +245,13 @@ set_print_shell_type() {
     case "$t" in
         *csh*)
             _print_shell_type=csh
-            _print_var=print_var_csh
+            _print_set_var=print_set_var_csh
             _print_source=print_source_csh
             _print_script_ext=.csh
             ;;
         *)
             _print_shell_type=sh
-            _print_var=print_var_sh
+            _print_set_var=print_set_var_sh
             _print_source=print_source_sh
             _print_script_ext=.sh
             ;;
@@ -269,6 +297,40 @@ print_em() {
 
 print_li() {
     print "${hoPRE:-}- ${cBLACKb:-}$*${cOFF:-}${hcPRE:-}"
+}
+
+## print_vars var1 var2 ...
+print_vars() {
+    local var val
+    for var in "$@" ; do
+        eval val="\${$var:-\"(not set)\"}"
+        print_value -0 "$var" "$val"
+    done
+}
+
+## print_var_eq_vals var1=val1 var2=val2 ...
+print_var_eq_vals() {
+    local varval var val
+    for varval in "$@" ; do
+        var=${varval%%=*}
+        if [[ "$var" = "$varval" ]] ; then
+            # No '='
+            val=
+        else
+            val=${varval##*=}
+        fi
+        print_value -0 "$var" "$val"
+    done
+}
+
+## print_var_val_pairs var1 val1 var2 val2 ...
+print_var_val_pairs() {
+    local var val
+    while (( $# )) ; do
+        var=$1 ; shift
+        val=${1:-} ; shift || true
+        print_value -0 "$var" "$val"
+    done
 }
 
 eval "$_qip_func_print_saved_state" ; unset _qip_func_print_saved_state

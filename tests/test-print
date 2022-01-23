@@ -1,0 +1,235 @@
+#!/usr/bin/env bash
+# Copyright © 2021 qualIP Software
+#
+# This file is part of shfuncs:
+#
+#     https://github.com/qualIP/shfuncs
+#
+# shfuncs is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3.0 of the License, or (at your option)
+# any later version.
+#
+# shfuncs is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with shfuncs; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+set -euo pipefail
+
+shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+. "$shfuncs_dir/func-test.sh"
+. "$shfuncs_dir/func-print.sh"
+
+OUT_TMP="$shfuncs_dir/test.OUT_TMP_file.tmp"
+OUT_TMP_DIR="$shfuncs_dir/test.OUT_TMP_DIR.tmp"
+mkdir -p "$OUT_TMP_DIR"
+
+tty_colors_off
+
+test_case print-1
+_last_print_is_nl=false
+test_assert_equal "$(print && echo _last_print_is_nl=$_last_print_is_nl)" $'\n_last_print_is_nl=true'
+
+test_case print-2
+_last_print_is_nl=false
+test_assert_equal "$(print a b c && echo _last_print_is_nl=$_last_print_is_nl)" $'a b c\n_last_print_is_nl=false'
+
+test_case print_nl-1
+_last_print_is_nl=false
+test_assert_equal "$(print_nl && echo _last_print_is_nl=$_last_print_is_nl)" $'\n_last_print_is_nl=true'
+
+test_case print_nl-2
+_last_print_is_nl=true
+test_assert_equal "$(print_nl && echo _last_print_is_nl=$_last_print_is_nl)" $'\n_last_print_is_nl=true'
+
+test_case print_need_nl-1
+_last_print_is_nl=false
+test_assert_equal "$(print_need_nl && echo _last_print_is_nl=$_last_print_is_nl)" $'\n_last_print_is_nl=true'
+
+test_case print_need_nl-2
+_last_print_is_nl=true
+test_assert_equal "$(print_need_nl && echo _last_print_is_nl=$_last_print_is_nl)" $'_last_print_is_nl=true'
+
+test_case indent-1
+cat > "$OUT_TMP" <<EOF
+A
+
+  B
+EOF
+_last_print_is_nl="false untouched"
+test_assert_equal "$(indent "$OUT_TMP" && echo _last_print_is_nl=$_last_print_is_nl)" $'    A\n\n      B\n_last_print_is_nl=false untouched'
+
+test_case indent-2
+cat > "$OUT_TMP" <<EOF
+A
+
+  B
+EOF
+_last_print_is_nl="false untouched"
+test_assert_equal "$(indent <"$OUT_TMP" && echo _last_print_is_nl=$_last_print_is_nl)" $'    A\n\n      B\n_last_print_is_nl=false untouched'
+
+test_case indent_esc-1
+cat > "$OUT_TMP" <<EOF
+A
+
+  B
+EOF
+_last_print_is_nl="false untouched"
+test_assert_equal "$(indent_esc "$OUT_TMP" && echo _last_print_is_nl=$_last_print_is_nl)" $'    A\n\n      B\n_last_print_is_nl=false untouched'
+
+test_case indent_esc-2
+cat > "$OUT_TMP" <<EOF
+A
+
+  B
+EOF
+_last_print_is_nl="false untouched"
+test_assert_equal "$(indent_esc <"$OUT_TMP" && echo _last_print_is_nl=$_last_print_is_nl)" $'    A\n\n      B\n_last_print_is_nl=false untouched'
+
+test_case print_fmt
+_last_print_is_nl=true
+test_assert_equal "$(print_fmt "C" "%s%04x%s-" X 123 X && echo _last_print_is_nl=$_last_print_is_nl)" $'CX007bX-_last_print_is_nl=false'
+
+test_case print_err
+test_assert_equal "$(print_err ERROR 2>&1 > /dev/null)" "** ERROR **"
+
+test_case print_dbg
+test_assert_equal "$(print_dbg DEBUG 2>&1 > /dev/null)" "DEBUG"
+
+test_case print_q-1
+test_assert_equal "$(print_q QUESTION ; echo X)" "QUESTION: X"
+
+test_case print_q-2
+test_assert_equal "$(print_q QUESTION: ; echo X)" "QUESTION: X"
+
+test_case print_q-3
+test_assert_equal "$(print_q QUESTION? ; echo X)" "QUESTION? X"
+
+test_case print_q-4
+test_assert_equal "$(print_q QUESTION? choices ; echo X)" "QUESTION? [choices] X"
+
+test_case print_a-1
+test_assert_equal "$(print_a)" ""
+
+test_case print_a-2
+test_assert_equal "$(print_a a b c)" "a b c"
+
+test_case print_status-1
+test_assert_equal "$(print_status title status)" "title:               status"
+
+test_case print_status-2
+test_assert_equal "$(print_status title status extra)" "title:               status extra"
+
+test_case print_status-3
+test_assert_equal "$(print_status -10 title status extra)" "title:     status extra"
+
+test_case print_status-4
+test_assert_equal "$(print_status -0 title status extra)" "title: status extra"
+
+test_case print_status-5
+test_assert_equal "$(print_status --nosep title status extra)" "title                status extra"
+
+test_case print_status-6
+test_assert_equal "$(print_status title true extra)" "title:               TRUE extra"
+
+test_case print_status-7
+test_assert_equal "$(print_status title ERR extra)" "title:               ERROR extra"
+
+test_case print_status-8
+test_assert_equal "$(print_status title NA extra)" "title:               N/A extra"
+
+test_case print_status-9
+test_assert_equal "$(print_status title "" extra)" "title:               extra"
+
+test_case print_status-10
+test_assert_equal "$(print_status title)" "title:"
+
+test_case print_cmd_status-1
+test_assert_equal "$(print_cmd_status cmd status extra)" "    $ cmd                status extra"
+
+test_case print_cmd_status-2
+test_assert_equal "$(print_cmd_status cmd status)" "    $ cmd                status"
+
+test_case print_cmd_status-3
+test_assert_equal "$(print_cmd_status cmd)" "    $ cmd"
+
+test_case print_cmd_status-4
+test_assert_equal "$(print_cmd_status -10 cmd status extra)" "    $ cmd      status extra"
+
+test_case print_value-1
+test_assert_equal "$(print_value name value extra)" "name:                value extra"
+
+test_case print_value-2
+test_assert_equal "$(print_value -10 name value extra)" "name:      value extra"
+
+test_case print_value-3
+test_assert_equal "$(print_value --nosep name value extra)" "name                 value extra"
+
+test_case print_value-4
+test_assert_equal "$(print_value name value)" "name:                value"
+
+test_case print_value-5
+test_assert_equal "$(print_value name)" "name:"
+
+test_case print_set_var_csh
+test_assert_equal "$(print_set_var_csh name " a b c")" "set name=' a b c'"
+
+test_case print_set_var_sh
+test_assert_equal "$(print_set_var_sh name " a b c")" "name=' a b c'"
+
+test_case print_source_csh
+test_assert_equal "$(print_source_csh " file name")" "source ' file name'"
+
+test_case print_source_sh
+test_assert_equal "$(print_source_sh " file name")" ". ' file name'"
+
+# TODO test_case set_print_shell_type
+# TODO test_case set_debug_mode
+
+test_case print_h1
+test_assert_equal "$(print_h1 Heading Title)" "# Heading Title"
+
+test_case print_h2
+test_assert_equal "$(print_h2 Heading Title)" "## Heading Title"
+
+test_case print_h3
+test_assert_equal "$(print_h3 Heading Title)" "### Heading Title"
+
+test_case print_em
+test_assert_equal "$(print_em some text)" "*some text*"
+
+test_case print_li
+test_assert_equal "$(print_li some text)" "- some text"
+
+A=1
+B=2
+C=3
+
+test_case print_vars-1
+test_assert_equal "$(print_vars)" ""
+
+test_case print_vars-2
+test_assert_equal "$(print_vars A B C)" $'A: 1\nB: 2\nC: 3'
+
+test_case print_var_eq_vals-1
+test_assert_equal "$(print_var_eq_vals)" ""
+
+test_case print_var_eq_vals-2
+test_assert_equal "$(print_var_eq_vals A=x B=y C)" $'A: x\nB: y\nC:'
+
+test_case print_var_val_pairs-1
+test_assert_equal "$(print_var_val_pairs)" ""
+
+test_case print_var_val_pairs-2
+test_assert_equal "$(print_var_val_pairs A x B y C)" $'A: x\nB: y\nC:'
+
+setup_tty_colors
+
+#rm "$OUT_TMP"
+rmdir "$OUT_TMP_DIR"
+unset OUT_TMP
