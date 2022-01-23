@@ -21,6 +21,9 @@ if [ -z "$BASH_VERSION" ] ; then echo Not running bash! >&2 ; exit 1 ; fi
 
 declare -F is_glob_pattern > /dev/null && return
 
+## is_glob_pattern string
+#
+# Returns wether the string looks like a glob pattern.
 is_glob_pattern() {
     case "$1" in
         *\**|*\?*|*\[*\]*) return 0 ;;
@@ -28,6 +31,9 @@ is_glob_pattern() {
     esac
 }
 
+## is_regexp_pattern string
+#
+# Returns wether the string looks like a regular expression pattern.
 is_regexp_pattern() {
     case "$1" in
         ^*|*\$|*\**) return 0 ;;
@@ -35,14 +41,19 @@ is_regexp_pattern() {
     esac
 }
 
+## expand_glob_pattern pat args...
+#
+# Print only arguments that match the specified glob pattern.
 expand_glob_pattern() {
     local pat="$1" ; shift
     local v
+    local ret=
     for v in "$@" ; do
         case "$v" in
-            $pat) echo "$v" ;;
+            $pat) ret="$ret $v" ;;
         esac
     done
+    echo $ret
 }
 
 # vim: ft=bash
