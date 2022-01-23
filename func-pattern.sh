@@ -49,10 +49,12 @@ expand_glob_pattern() {
     local v
     local ret=
     for v in "$@" ; do
+        # shellcheck disable=SC2254
         case "$v" in
             $pat) ret="$ret $v" ;;
         esac
     done
+    # shellcheck disable=SC2086
     echo $ret
 }
 

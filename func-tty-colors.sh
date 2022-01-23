@@ -22,6 +22,7 @@ if [ -z "$BASH_VERSION" ] ; then echo Not running bash! >&2 ; exit 1 ; fi
 # Might want to be able re-source...
 declare -F setup_tty_colors > /dev/null && return
 
+# shellcheck disable=SC2034
 tty_colors_off() {
     tty_colors_mode=off
     # Foreground, normal and bold
@@ -58,6 +59,7 @@ tty_colors_off() {
     hcPRE=""
 }
 
+# shellcheck disable=SC2034
 tty_colors_on() {
     tty_colors_mode=on
     # Foreground, normal and bold
@@ -96,6 +98,7 @@ tty_colors_on() {
     hcPRE=""
 }
 
+# shellcheck disable=SC2034
 tty_colors_html() {
     tty_colors_mode=html
     # Foreground, normal and bold

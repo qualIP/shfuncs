@@ -27,6 +27,7 @@ declare -F make_comma_list > /dev/null && return
 split() {
     local old_IFS="$IFS"
     local IFS="$1" ; shift
+    # shellcheck disable=SC2068
     set -- $@
     IFS="$old_IFS"
     echo "$@"
@@ -37,6 +38,7 @@ split() {
 # Arguments are split on spaces and commas then joined with commas ','.
 make_comma_list() {
     local IFS=",$IFS"
+    # shellcheck disable=SC2048,SC2086
     set -- $*
     echo "$*"
 }
@@ -46,6 +48,7 @@ make_comma_list() {
 # Arguments are split on spaces and commas then joined with spaces ' '.
 make_space_list() {
     local IFS=" $IFS,"
+    # shellcheck disable=SC2048,SC2086
     set -- $*
     echo "$*"
 }
@@ -55,6 +58,7 @@ make_space_list() {
 # Arguments are split on spaces and commas then joined with newlines '\n'.
 make_newline_list() {
     local IFS=$'\n'"$IFS,"
+    # shellcheck disable=SC2048,SC2086
     set -- $*
     echo "$*"
 }
@@ -64,6 +68,7 @@ make_newline_list() {
 # Arguments are split on spaces and commas then joined with colons ':'.
 make_colon_list() {
     local IFS=":$IFS,"
+    # shellcheck disable=SC2048,SC2086
     set -- $*
     echo "$*"
 }
@@ -73,6 +78,7 @@ make_colon_list() {
 # Arguments are split on spaces and commas then joined with semicolons ';'.
 make_semicolon_list() {
     local IFS=";$IFS,"
+    # shellcheck disable=SC2048,SC2086
     set -- $*
     echo "$*"
 }
@@ -96,6 +102,7 @@ join_list() {
 # Modify the specified variable by prepending it with all other arguments
 lprepend() {
     local _lprepend_var="$1" ; shift 1
+    # shellcheck disable=SC2086
     set -- "$@" ${!_lprepend_var}
     local _lprepend_val="$*"
     eval "$_lprepend_var"=\$_lprepend_val
@@ -107,6 +114,7 @@ alias lpush=lprepend
 # Modify the specified variable by appending it with all other arguments
 lappend() {
     local _lappend_var="$1" ; shift 1
+    # shellcheck disable=SC2086
     set -- ${!_lappend_var} "$@"
     local _lappend_val="$*"
     eval "$_lappend_var"=\$_lappend_val
@@ -122,6 +130,7 @@ lpop() {
     else
         local _lpop_outvar=lpop_value
     fi
+    # shellcheck disable=SC2086
     set -- ${!_lpop_var}
     (( $# )) || return 1
     eval "$_lpop_outvar"=\$1 ; shift 1
@@ -135,8 +144,10 @@ lindex() {
     local shift_cnt=$1 ; shift
     case "$shift_cnt" in
         end|end-[0-9]*)
+            # shellcheck disable=SC2034
             local end=$(( $# - 1 ))
-            local shift_cnt=$(($shift_cnt))
+            # shellcheck disable=SC2004
+            local shift_cnt=$(( $shift_cnt ))
             ;;
         *)
             :
@@ -164,8 +175,10 @@ lcontain() {
 lrmdupes() {
     local l='' v
     for v in "$@" ; do
+        # shellcheck disable=SC2086
         lcontain "$v" $l || l="$l $v"
     done
+    # shellcheck disable=SC2086
     echo $l
 }
 
@@ -180,6 +193,7 @@ lsubst() {
         [ "$v" = "$from" ] && v="$to"
         ret="$ret $v"
     done
+    # shellcheck disable=SC2086
     echo $ret
 }
 
@@ -205,6 +219,7 @@ lorder() {
         done
         unorderedl="$tmpl $unorderedl"
     done
+    # shellcheck disable=SC2086
     echo $orderredl $unorderedl
 }
 
@@ -216,6 +231,7 @@ lsort() {
     local IFS=$'\n'
     local v ; v=$(sort <<<"$*")
     IFS="$old_IFS"
+    # shellcheck disable=SC2086
     echo $v
 }
 

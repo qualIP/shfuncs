@@ -56,6 +56,7 @@ print_need_nl() {
 ## indent [file ...]
 #
 # Indent the content of standard input or the given file names.
+# shellcheck disable=SC2120
 indent() {
     sed -e 's/^./    &/' "$@"
 }
@@ -64,7 +65,9 @@ indent() {
 #
 # Indent the content of standard input or the given file names.
 # Supports basic terminal escape sequences.
+# shellcheck disable=SC2120
 indent_esc() {
+    # shellcheck disable=SC2016
     ${PERL:-perl} -lpe '
     BEGIN {
         sub inc { my ($num) = @_; $num += 4 }
@@ -82,6 +85,7 @@ indent_esc() {
 print_fmt() {
     local c=$1 ; shift
     local f=$1 ; shift
+    # shellcheck disable=SC2059
     printf "${hoPRE:-}${c}$f${cOFF:-}${hcPRE:-}" "$@"
     _last_print_is_nl=false
 }
@@ -180,8 +184,10 @@ print_status() {
         +([A-Z-])) c=${cRED:-}           ;;
     esac
     if [[ -n "$s" ]] ; then
+        # shellcheck disable=SC2086
         _print_status_internal "$n" $nosep "$t" "${c}${b}$s${b:+${cbOFF}}${c:+${cOFF:-}}" "$@"
     else
+        # shellcheck disable=SC2086
         _print_status_internal "$n" $nosep "$t" "$@"
     fi
 }
@@ -201,6 +207,7 @@ print_cmd_status() {
     esac
     local t="$1" ; shift
     local s="${1:-}" ; shift || true
+    # shellcheck disable=SC2086
     print_status "$n" $nosep "\$ $t" "$s" "$@" | indent
     _last_print_is_nl=false
 }
@@ -219,6 +226,7 @@ print_value() {
         --nosep) nosep=$1 ; shift 1 ;;
     esac
     local t="$1" ; shift
+    # shellcheck disable=SC2086
     _print_status_internal "$n" $nosep "$t" "$@"
 }
 
@@ -244,16 +252,16 @@ set_print_shell_type() {
     local t="$1"
     case "$t" in
         *csh*)
-            _print_shell_type=csh
-            _print_set_var=print_set_var_csh
-            _print_source=print_source_csh
-            _print_script_ext=.csh
+            _print_shell_type='csh'
+            _print_set_var='print_set_var_csh'
+            _print_source='print_source_csh'
+            _print_script_ext='.csh'
             ;;
         *)
-            _print_shell_type=sh
-            _print_set_var=print_set_var_sh
-            _print_source=print_source_sh
-            _print_script_ext=.sh
+            _print_shell_type='sh'
+            _print_set_var='print_set_var_sh'
+            _print_source='print_source_sh'
+            _print_script_ext='.sh'
             ;;
     esac
 }

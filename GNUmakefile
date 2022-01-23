@@ -7,9 +7,7 @@ help:
 	@exit 1
 
 check:
-	shellcheck --norc --shell=bash --format=gcc func-*.sh tests/test-* \
-		| grep -v '^func-assert.sh:.*SC2034' \
-		| grep -v '^func-git.sh:.*warning: EGIT_BISECT_CANT_TEST appears unused.*SC2034' \
+	shellcheck --norc --shell=bash --format=gcc func-*.sh tests/test-*
 
 test:
 	./tests/test-all

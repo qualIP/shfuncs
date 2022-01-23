@@ -45,6 +45,7 @@ find_in_dir() {
         esac
     done
     local dir=$1 ; shift
+    # shellcheck disable=SC2086
     (cd "$dir" && "${FIND:-find}" $opt . "$@") | ${SED:-sed} -e "s@^\./@$dir/@" -e "s@///*@/@g"
 }
 

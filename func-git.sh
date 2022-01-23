@@ -26,6 +26,7 @@ declare -F test_git_changeset > /dev/null && return
 . "$(dirname "${BASH_SOURCE[0]}")/func-print.sh"
 . "$(dirname "${BASH_SOURCE[0]}")/func-utils.sh"
 
+# shellcheck disable=SC2034
 EGIT_BISECT_CANT_TEST=125
 
 ## test_git_changeset [untracked_ok?]

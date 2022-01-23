@@ -28,14 +28,8 @@ shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 test_color_palette() {
     local line v c
 
-    local BK=BLACK
-    local RD=RED
-    local GR=GREEN
-    local YE=YELLOW
-    local BL=BLUE
-    local MA=MAGENTA
-    local CY=CYAN
-    local WH=WHITE
+    # shellcheck disable=SC2034
+    local BK=BLACK RD=RED GR=GREEN YE=YELLOW BL=BLUE MA=MAGENTA CY=CYAN WH=WHITE
     local colors="BK RD GR YE BL MA CY WH"
 
     line="  "

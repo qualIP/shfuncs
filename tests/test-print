@@ -62,7 +62,7 @@ A
   B
 EOF
 _last_print_is_nl="false untouched"
-test_assert_equal "$(indent "$OUT_TMP" && echo _last_print_is_nl=$_last_print_is_nl)" $'    A\n\n      B\n_last_print_is_nl=false untouched'
+test_assert_equal "$(indent "$OUT_TMP" && echo _last_print_is_nl="$_last_print_is_nl")" $'    A\n\n      B\n_last_print_is_nl=false untouched'
 
 test_case indent-2
 cat > "$OUT_TMP" <<EOF
@@ -71,7 +71,7 @@ A
   B
 EOF
 _last_print_is_nl="false untouched"
-test_assert_equal "$(indent <"$OUT_TMP" && echo _last_print_is_nl=$_last_print_is_nl)" $'    A\n\n      B\n_last_print_is_nl=false untouched'
+test_assert_equal "$(indent <"$OUT_TMP" && echo _last_print_is_nl="$_last_print_is_nl")" $'    A\n\n      B\n_last_print_is_nl=false untouched'
 
 test_case indent_esc-1
 cat > "$OUT_TMP" <<EOF
@@ -80,7 +80,7 @@ A
   B
 EOF
 _last_print_is_nl="false untouched"
-test_assert_equal "$(indent_esc "$OUT_TMP" && echo _last_print_is_nl=$_last_print_is_nl)" $'    A\n\n      B\n_last_print_is_nl=false untouched'
+test_assert_equal "$(indent_esc "$OUT_TMP" && echo _last_print_is_nl="$_last_print_is_nl")" $'    A\n\n      B\n_last_print_is_nl=false untouched'
 
 test_case indent_esc-2
 cat > "$OUT_TMP" <<EOF
@@ -89,7 +89,7 @@ A
   B
 EOF
 _last_print_is_nl="false untouched"
-test_assert_equal "$(indent_esc <"$OUT_TMP" && echo _last_print_is_nl=$_last_print_is_nl)" $'    A\n\n      B\n_last_print_is_nl=false untouched'
+test_assert_equal "$(indent_esc <"$OUT_TMP" && echo _last_print_is_nl="$_last_print_is_nl")" $'    A\n\n      B\n_last_print_is_nl=false untouched'
 
 test_case print_fmt
 _last_print_is_nl=true
@@ -206,9 +206,8 @@ test_assert_equal "$(print_em some text)" "*some text*"
 test_case print_li
 test_assert_equal "$(print_li some text)" "- some text"
 
-A=1
-B=2
-C=3
+# shellcheck disable=SC2034
+A=1 B=2 C=3
 
 test_case print_vars-1
 test_assert_equal "$(print_vars)" ""

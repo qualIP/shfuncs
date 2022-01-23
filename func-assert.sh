@@ -24,6 +24,9 @@ declare -F assert_file_exists > /dev/null && return
 . "$(dirname "${BASH_SOURCE[0]}")/func-args.sh"
 . "$(dirname "${BASH_SOURCE[0]}")/func-print.sh"
 
+# shellcheck disable=SC2034
+{
+
 EOK=0
 
 # /usr/include/asm-generic/errno-base.h
@@ -162,6 +165,8 @@ EOWNERDEAD=130  # Owner died
 ENOTRECOVERABLE=131     # State not recoverable
 ERFKILL=132     # Operation not possible due to RF-kill
 EHWPOISON=133   # Memory page has hardware error
+
+}
 
 assert_file_exists() {
     local loc_OPT_VERBOSE="$OPT_VERBOSE"

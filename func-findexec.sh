@@ -108,11 +108,11 @@ _realpath() {
     if [ -n "$l" ] ; then
         d1=$(dirname "$p")
         d2=$(dirname "$l")
-        d=$(cd "$d1" ; cd "$d2" ; pwd)
+        d=$(cd "$d1" && cd "$d2" && pwd) || return $?
         f=$(basename "$l")
     else
         d=$(dirname "$p")
-        d=$(cd "$d" ; pwd)
+        d=$(cd "$d" && pwd) || return $?
         f=$(basename "$p")
     fi
     echo "${d%/}/$f"

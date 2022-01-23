@@ -57,13 +57,14 @@ utils_run_curl() {
     local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
     rm -f "$loc_OUT_TMP"
     HTTP_CODE=
-    eval $(${OPT_DEBUG:-false} && set -x ; ${CURL:-curl} \
+    # shellcheck disable=SC2046
+    eval "$(${OPT_DEBUG:-false} && set -x ; ${CURL:-curl} \
         --compress \
         --silent \
         -w 'HTTP_CODE=%{http_code}' \
         -o "$loc_OUT_TMP" \
         $(${OPT_DEBUG:-false} && echo "-v") \
-        "$@")
+        "$@")"
     if [ "$HTTP_CODE" != "200" ] ; then
         print_err "Error: Request returned code $HTTP_CODE."
         if [ -f "$loc_OUT_TMP" ] ; then
