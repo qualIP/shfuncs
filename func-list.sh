@@ -21,6 +21,9 @@ if [ -z "$BASH_VERSION" ] ; then echo Not running bash! >&2 ; exit 1 ; fi
 
 declare -F make_comma_list > /dev/null && return
 
+## split sep data... ...
+#
+# Splits all the data strings using the specified separator(s).
 split() {
     local old_IFS="$IFS"
     local IFS="$1" ; shift
@@ -29,76 +32,110 @@ split() {
     echo "$@"
 }
 
+## make_comma_list data... ...
+#
+# Arguments are split on spaces and commas then joined with commas ','.
 make_comma_list() {
     local IFS=",$IFS"
     set -- $*
     echo "$*"
 }
 
+## make_space_list data... ...
+#
+# Arguments are split on spaces and commas then joined with spaces ' '.
 make_space_list() {
     local IFS=" $IFS,"
     set -- $*
     echo "$*"
 }
 
+## make_newline_list data... ...
+#
+# Arguments are split on spaces and commas then joined with newlines '\n'.
 make_newline_list() {
-    local IFS="
-$IFS,"
+    local IFS=$'\n'"$IFS,"
     set -- $*
     echo "$*"
 }
 
+## make_colon_list data... ...
+#
+# Arguments are split on spaces and commas then joined with colons ':'.
 make_colon_list() {
     local IFS=":$IFS,"
     set -- $*
     echo "$*"
 }
 
+## make_semicolon_list data... ...
+#
+# Arguments are split on spaces and commas then joined with semicolons ';'.
 make_semicolon_list() {
     local IFS=";$IFS,"
     set -- $*
     echo "$*"
 }
 
+## join_list sep args...
+#
+# Arguments are joined with the specified separator.
 join_list() {
-    local sepin="$1" ; shift
-    local sep=
+    # fudging IFS only works with a single-character separator
+    local sep="$1" ; shift
     local ret=
     local v
     for v in "$@" ; do
-        ret="$ret$sep$v"
-        sep="$sepin"
+        ret="$ret${ret:+$sep}$v"
     done
     echo "$ret"
 }
 
+## lprepend var args...
+#
+# Modify the specified variable by prepending it with all other arguments
 lprepend() {
-    local var="$1" ; shift 1
-    local val="$*${!var:+ }${!var}"
-    eval "$var"="'$val'"
+    local _lprepend_var="$1" ; shift 1
+    set -- "$@" ${!_lprepend_var}
+    local _lprepend_val="$*"
+    eval "$_lprepend_var"=\$_lprepend_val
 }
 alias lpush=lprepend
 
+## lappend var args...
+#
+# Modify the specified variable by appending it with all other arguments
 lappend() {
-    local var="$1" ; shift 1
-    local val="${!var}${!var:+ }$*"
-    eval "$var"="'$val'"
+    local _lappend_var="$1" ; shift 1
+    set -- ${!_lappend_var} "$@"
+    local _lappend_val="$*"
+    eval "$_lappend_var"=\$_lappend_val
 }
 
+## lpop var [outvar=lpop_value]
+#
+# Modify the specified variable by appending it with all other arguments
 lpop() {
-    local var="$1"
-    local outvar=lpop_value ; [ -n "$2" ] && outvar="$2"
-    set -- ${!var}
-    [ $# = 0 ] && return 1
-    eval "$outvar"="$1" ; shift 1
-    eval "$var"="'$*'"
+    local _lpop_var="$1" ; shift
+    if (( $# )) ; then
+        local _lpop_outvar="$1" ; shift
+    else
+        local _lpop_outvar=lpop_value
+    fi
+    set -- ${!_lpop_var}
+    (( $# )) || return 1
+    eval "$_lpop_outvar"=\$1 ; shift 1
+    eval "$_lpop_var"=\$\*
 }
 
+## lindex idx args...
+#
+# Returns the idx-nth index of the argument list.
 lindex() {
     local shift_cnt=$1 ; shift
     case "$shift_cnt" in
         end|end-[0-9]*)
-            local end=$(( $# - 1))
+            local end=$(( $# - 1 ))
             local shift_cnt=$(($shift_cnt))
             ;;
         *)
@@ -111,13 +148,19 @@ lindex() {
     fi
 }
 
+## lcontain needle args...
+#
+# Tests if needle is an element of the argument list.
 lcontain() {
     local el="$1" ; shift
     local v
-    for v in $* ; do [[ "$v" != "$el" ]] || return 0 ; done
+    for v in "$@" ; do [[ "$v" != "$el" ]] || return 0 ; done
     return 1
 }
 
+## lrmdupes args...
+#
+# Returns all unique arguments, in first appearance order.
 lrmdupes() {
     local l='' v
     for v in "$@" ; do
@@ -126,43 +169,54 @@ lrmdupes() {
     echo $l
 }
 
-#lrmdupes() {
-#    echo $(make_newline_list $* | sort -u)
-#}
-
+## lsubst from to args...
+#
+# Substitute all elements equal to `from` with `to` in the arguments list.
 lsubst() {
     local from="$1" ; shift
     local to="$1" ; shift
     local ret='' v
-    for v in $* ; do
+    for v in "$@" ; do
         [ "$v" = "$from" ] && v="$to"
         ret="$ret $v"
     done
     echo $ret
 }
 
+## lorder list1 list2
+#
+# Return all elements of list1 in the order presented in list2, with unique
+# elements of l1 at the end.
 lorder() {
-    local l1="$1" ; shift
+    local unorderedl="$1" ; shift
     local l2="$1" ; shift
-    local l v
-    for v in $l2 ; do
-        if lcontain "$v" $l1 ; then
-            l="$l${l:+ }$v"
-        fi
+    local tmpl=
+    local orderredl=
+    local e
+    local lpop_value
+    for e in $l2 ; do
+        tmpl=
+        while lpop unorderedl ; do
+            if [[ "$lpop_value" = "$e" ]] ; then
+                orderredl="$orderredl $e"
+                break
+            fi
+            tmpl="$tmpl $lpop_value"
+        done
+        unorderedl="$tmpl $unorderedl"
     done
-    for v in $l1 ; do
-        if ! lcontain "$v" $l ; then
-            l="$l${l:+ }$v"
-        fi
-    done
-    echo "$l"
+    echo $orderredl $unorderedl
 }
 
+## lsort args...
+#
+# Returns the sorted list of arguments.
 lsort() {
     local old_IFS="$IFS"
     local IFS=$'\n'
-    sort <<<"$*"
+    local v ; v=$(sort <<<"$*")
     IFS="$old_IFS"
+    echo $v
 }
 
 # vim: ft=bash

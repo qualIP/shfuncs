@@ -1,0 +1,273 @@
+#!/usr/bin/env bash
+# Copyright © 2021 qualIP Software
+#
+# This file is part of shfuncs:
+#
+#     https://github.com/qualIP/shfuncs
+#
+# shfuncs is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3.0 of the License, or (at your option)
+# any later version.
+#
+# shfuncs is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with shfuncs; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+set -euo pipefail
+
+shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+. "$shfuncs_dir/func-test.sh"
+. "$shfuncs_dir/func-list.sh"
+
+OUT_TMP="$shfuncs_dir/test.OUT_TMP_file.tmp"
+OUT_TMP_DIR="$shfuncs_dir/test.OUT_TMP_DIR.tmp"
+mkdir -p "$OUT_TMP_DIR"
+
+test_case split-1
+test_assert_equal "$(split ,)" ''
+
+test_case split-2
+test_assert_equal "$(split , w1,w2,w3)" 'w1 w2 w3'
+
+test_case split-3
+test_assert_equal "$(split , a,b  ,c,d  e,f g@h)" 'a b  c d e f g@h'
+
+test_case split-4
+test_assert_equal "$(split ,@ a,b  ,c,d  e,f g@h)" 'a b  c d e f g h'
+
+test_case make_comma_list-1
+test_assert_equal "$(make_comma_list)" ''
+
+test_case make_comma_list-2
+test_assert_equal "$(make_comma_list "a b" c d "e,f")" 'a,b,c,d,e,f'
+
+test_case make_comma_list-3
+test_assert_equal "$(make_comma_list "a b" c d "e@f")" 'a,b,c,d,e@f'
+
+test_case make_space_list-1
+test_assert_equal "$(make_space_list)" ''
+
+test_case make_space_list-2
+test_assert_equal "$(make_space_list "a b" c d "e,f")" 'a b c d e f'
+
+test_case make_space_list-3
+test_assert_equal "$(make_space_list "a b" c d "e@f")" 'a b c d e@f'
+
+test_case make_newline_list-1
+test_assert_equal "$(make_newline_list)" ''
+
+test_case make_newline_list-2
+test_assert_equal "$(make_newline_list "a b" c d "e,f")" $'a\nb\nc\nd\ne\nf'
+
+test_case make_newline_list-3
+test_assert_equal "$(make_newline_list "a b" c d "e@f")" $'a\nb\nc\nd\ne@f'
+
+test_case make_colon_list-1
+test_assert_equal "$(make_colon_list)" ''
+
+test_case make_colon_list-2
+test_assert_equal "$(make_colon_list "a b" c d "e,f")" 'a:b:c:d:e:f'
+
+test_case make_colon_list-3
+test_assert_equal "$(make_colon_list "a b" c d "e@f")" 'a:b:c:d:e@f'
+
+test_case make_semicolon_list-1
+test_assert_equal "$(make_semicolon_list)" ''
+
+test_case make_semicolon_list-2
+test_assert_equal "$(make_semicolon_list "a b" c d "e,f")" 'a;b;c;d;e;f'
+
+test_case make_semicolon_list-3
+test_assert_equal "$(make_semicolon_list "a b" c d "e@f")" 'a;b;c;d;e@f'
+
+test_case join_list-1
+test_assert_equal "$(join_list ,)" ''
+
+test_case join_list-2
+test_assert_equal "$(join_list , "a b" c d "e,f")" 'a b,c,d,e,f'
+
+test_case join_list-3
+test_assert_equal "$(join_list , "a b" c d "e@f")" 'a b,c,d,e@f'
+
+test_case lprepend-1
+VAR=
+test_assert_equal "$(lprepend VAR)" ""
+lprepend VAR
+test_assert_equal "$VAR" ""
+
+test_case lprepend-2
+VAR=
+test_assert_equal "$(lprepend VAR a b c)" ""
+lprepend VAR a b c
+test_assert_equal "$VAR" "a b c"
+
+test_case lprepend-3
+VAR="a b c"
+test_assert_equal "$(lprepend VAR)" ""
+lprepend VAR
+test_assert_equal "$VAR" "a b c"
+
+test_case lprepend-4
+VAR="a b c"
+test_assert_equal "$(lprepend VAR d e f)" ""
+lprepend VAR d e f
+test_assert_equal "$VAR" "d e f a b c"
+
+VAR="x y z"
+_test_lpreprend_5() {
+    test_case lprepend-5
+    test_assert_equal "$(lprepend VAR d e f)" ""
+    lprepend VAR d e f
+}
+_test_lpreprend_5
+test_assert_equal "$VAR" "d e f x y z"
+
+VAR="x y z"
+_test_lpreprend_6() {
+    local VAR="a b c"
+    test_case lprepend-6
+    test_assert_equal "$(lprepend VAR d e f)" ""
+    lprepend VAR d e f
+    test_assert_equal "$VAR" "d e f a b c"
+}
+_test_lpreprend_6
+test_assert_equal "$VAR" "x y z"
+
+test_case lappend-1
+VAR=
+test_assert_equal "$(lappend VAR)" ""
+lappend VAR
+test_assert_equal "$VAR" ""
+
+test_case lappend-2
+VAR=
+test_assert_equal "$(lappend VAR a b c)" ""
+lappend VAR a b c
+test_assert_equal "$VAR" "a b c"
+
+test_case lappend-3
+VAR="a b c"
+test_assert_equal "$(lappend VAR)" ""
+lappend VAR
+test_assert_equal "$VAR" "a b c"
+
+test_case lappend-4
+VAR="a b c"
+test_assert_equal "$(lappend VAR d e f)" ""
+lappend VAR d e f
+test_assert_equal "$VAR" "a b c d e f"
+
+test_case lpop-1
+VAR=
+test_assert_rc 1 lpop VAR
+test_assert_equal "$VAR" ""
+
+test_case lpop-2
+VAR="a b c"
+test_assert_equal "$(lpop VAR)" ""
+lpop VAR
+test_assert_equal "$lpop_value" "a"
+test_assert_equal "$VAR" "b c"
+
+test_case lpop-3
+VAR="c"
+test_assert_equal "$(lpop VAR)" ""
+lpop VAR
+test_assert_equal "$lpop_value" "c"
+test_assert_equal "$VAR" ""
+
+test_case lpop-4
+VAR="a b c"
+OUTVAR=
+test_assert_equal "$(lpop VAR OUTVAR)" ""
+lpop VAR OUTVAR
+test_assert_equal "$OUTVAR" "a"
+test_assert_equal "$VAR" "b c"
+
+test_case lindex-1
+test_assert_equal "$(lindex 0 a "b c" d e f)" "a"
+
+test_case lindex-2
+test_assert_equal "$(lindex 1 a "b c" d e f)" "b c"
+
+test_case lindex-3
+test_assert_equal "$(lindex end a "b c" d e f)" "f"
+
+test_case lindex-4
+test_assert_equal "$(lindex end-2 a "b c" d e f)" "d"
+
+test_case lindex-5
+test_assert_equal "$(lindex 2)" ""
+
+test_case lindex-6
+test_assert_equal "$(lindex end-2)" ""
+
+test_case lcontain-1
+test_assert_equal "$(lcontain a a b c || true)" ""
+test_assert_rc 0 lcontain a a b c
+
+test_case lcontain-2
+test_assert_equal "$(lcontain d a b c || true)" ""
+test_assert_rc 1 lcontain d a b c
+
+test_case lcontain-3
+test_assert_equal "$(lcontain '' a b c || true)" ""
+test_assert_rc 1 lcontain '' a b c
+
+test_case lcontain-4
+test_assert_equal "$(lcontain 'a b' a b c || true)" ""
+test_assert_rc 1 lcontain 'a b' a b c
+
+test_case lcontain-5
+test_assert_equal "$(lcontain 'a b' "a b" c || true)" ""
+test_assert_rc 0 lcontain 'a b' "a b" c
+
+test_case lcontain-6
+test_assert_equal "$(lcontain a "a b" c || true)" ""
+test_assert_rc 1 lcontain a "a b" c
+
+test_case lrmdupes-1
+test_assert_equal "$(lrmdupes a b c)" "a b c"
+
+test_case lrmdupes-2
+test_assert_equal "$(lrmdupes a a b d c c a b c d)" "a b d c"
+
+test_case lrmdupes-3
+test_assert_equal "$(lrmdupes)" ""
+
+test_case lsubst-1
+test_assert_equal "$(lsubst a x a b c a b c)" "x b c x b c"
+
+test_case lsubst-2
+test_assert_equal "$(lsubst z x a b c a b c)" "a b c a b c"
+
+test_case lsubst-3
+test_assert_equal "$(lsubst "a b" x "a b" c a b c)" "x c a b c"
+
+test_case lorder-1
+test_assert_equal "$(lorder "" "")" ""
+
+test_case lorder-2
+test_assert_equal "$(lorder "c g b h a" "a b c d e f")" "a b c g h"
+
+test_case lorder-3
+test_assert_equal "$(lorder "c b b a a" "a b a c")" "a b a c b"
+
+test_case lsort-1
+test_assert_equal "$(lsort)" ""
+
+test_case lsort-2
+test_assert_equal "$(lsort c b a)" "a b c"
+
+test_case lsort-3
+test_assert_equal "$(lsort c "b a" d)" "b a c d"
+
+#rm "$OUT_TMP"
+rmdir "$OUT_TMP_DIR"
+unset OUT_TMP
