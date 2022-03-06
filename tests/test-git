@@ -28,7 +28,7 @@ SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
 . "$SHFUNCS_DIR/func-git.sh"
 . "$SHFUNCS_DIR/func-cmd.sh"
 
-TEST_TMP_DIR="$SHFUNCS_DIR/test.TEST_TMP_DIR.tmp"
+TEST_TMP_DIR="$SHFUNCS_DIR/test.TEST_TMP_DIR.$$.tmp"
 rm -Rf "$TEST_TMP_DIR"
 
 mkdir "$TEST_TMP_DIR"

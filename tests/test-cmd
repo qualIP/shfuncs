@@ -26,8 +26,8 @@ SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
 . "$SHFUNCS_DIR/func-test.sh"
 . "$SHFUNCS_DIR/func-cmd.sh"
 
-OUT_TMP="$SHFUNCS_DIR/test.OUT_TMP_file.tmp"
-OUT_TMP_DIR="$SHFUNCS_DIR/test.OUT_TMP_DIR.tmp"
+OUT_TMP="$SHFUNCS_DIR/test.OUT_TMP_file.$$.tmp"
+OUT_TMP_DIR="$SHFUNCS_DIR/test.OUT_TMP_DIR.$$.tmp"
 mkdir -p "$OUT_TMP_DIR"
 
 unset OPT_DRYRUN

@@ -26,8 +26,8 @@ SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
 . "$SHFUNCS_DIR/func-test.sh"
 . "$SHFUNCS_DIR/func-print.sh"
 
-OUT_TMP="$SHFUNCS_DIR/test.OUT_TMP_file.tmp"
-OUT_TMP_DIR="$SHFUNCS_DIR/test.OUT_TMP_DIR.tmp"
+OUT_TMP="$SHFUNCS_DIR/test.OUT_TMP_file.$$.tmp"
+OUT_TMP_DIR="$SHFUNCS_DIR/test.OUT_TMP_DIR.$$.tmp"
 mkdir -p "$OUT_TMP_DIR"
 
 tty_colors_off
@@ -233,6 +233,6 @@ test_assert_equal "$(print_var_val_pairs A x B y C)" $'A: x\nB: y\nC:'
 
 setup_tty_colors
 
-#rm "$OUT_TMP"
+rm "$OUT_TMP"
 rmdir "$OUT_TMP_DIR"
 unset OUT_TMP
