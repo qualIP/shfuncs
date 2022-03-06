@@ -98,6 +98,9 @@ test_assert_equal "$(print_fmt "C" "%s%04x%s-" X 123 X && echo _last_print_is_nl
 test_case print_err
 test_assert_equal "$(print_err ERROR 2>&1 > /dev/null)" "** ERROR **"
 
+test_case print_warn
+test_assert_equal "$(print_warn WARN 2>&1 > /dev/null)" "** WARN **"
+
 test_case print_dbg
 test_assert_equal "$(print_dbg DEBUG 2>&1 > /dev/null)" "DEBUG"
 

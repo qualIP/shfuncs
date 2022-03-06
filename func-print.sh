@@ -111,6 +111,13 @@ print_err() {
     _print "${hoPRE:-}${cRED:-}** $* **${cOFF:-}${hcPRE:-}" >&2
 }
 
+## print_warn warning_message ...
+#
+# Prints the warning message to standard error in magenta.
+print_warn() {
+    _print "${hoPRE:-}${cMAGENTA:-}** $* **${cOFF:-}${hcPRE:-}" >&2
+}
+
 #
 # Prints the debug message to standard error in yellow.
 print_dbg() {
