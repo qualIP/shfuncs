@@ -21,9 +21,10 @@
 
 set -euo pipefail
 
-shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
-. "$shfuncs_dir/func-test.sh"
-. "$shfuncs_dir/func-uri.sh"
+# shellcheck disable=all
+SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
+. "$SHFUNCS_DIR/func-test.sh"
+. "$SHFUNCS_DIR/func-uri.sh"
 
 test_case make_url
 test_assert_equal "$(make_url www.qualipsoft.com/test)" "www.qualipsoft.com/test"

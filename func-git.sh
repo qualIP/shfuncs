@@ -21,15 +21,19 @@ if [ -z "${BASH_VERSION:-}${ZSH_VERSION:-}" ] ; then echo Not running bash or zs
 
 typeset -f test_git_changeset > /dev/null && return
 
-. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-cmd.sh"
-. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-assert.sh"
-. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-print.sh"
-. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-utils.sh"
+# shellcheck disable=all
+SHFUNCS_DIR=${SHFUNCS_DIR:-$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")}
+. "$SHFUNCS_DIR/func-cmd.sh"
+. "$SHFUNCS_DIR/func-assert.sh"
+. "$SHFUNCS_DIR/func-print.sh"
+. "$SHFUNCS_DIR/func-utils.sh"
 
 # shellcheck disable=SC2034
 EGIT_BISECT_CANT_TEST=125
 
 # See https://github.com/libgit2/libgit2/blob/1327dbcf2a4273a8ba6fd978db5f0882530af94d/src/libgit2/refs.h
+# shellcheck disable=SC2034
+{
 GIT_REFS_DIR="refs/"
 GIT_REFS_HEADS_DIR="${GIT_REFS_DIR}heads/"
 GIT_REFS_TAGS_DIR="${GIT_REFS_DIR}tags/"
@@ -55,6 +59,7 @@ GIT_SEQUENCER_OPTIONS_FILE="${GIT_SEQUENCER_DIR}options"
 GIT_SEQUENCER_TODO_FILE="${GIT_SEQUENCER_DIR}todo"
 GIT_STASH_FILE="stash"
 GIT_REFS_STASH_FILE="${GIT_REFS_DIR}$GIT_STASH_FILE"
+}
 
 ## test_git_changeset [untracked_ok?]
 test_git_changeset() {
@@ -124,7 +129,7 @@ git_toplevel() {
 git_state() {
     # See https://github.com/libgit2/libgit2/blob/main/src/libgit2/repository.c
     # Much faster to use $git_dir than rely on git_path for every file.
-    local git_dir=$(git_dir)
+    local git_dir ; git_dir=$(git_dir)
     if [[ -f "$git_dir/$GIT_REBASE_MERGE_INTERACTIVE_FILE" ]] ; then
         echo "rebase_interactive"
     elif [[ -d "$git_dir/$GIT_REBASE_MERGE_DIR" ]] ; then

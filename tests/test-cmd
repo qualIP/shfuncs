@@ -21,12 +21,13 @@
 
 set -euo pipefail
 
-shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
-. "$shfuncs_dir/func-test.sh"
-. "$shfuncs_dir/func-cmd.sh"
+# shellcheck disable=all
+SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
+. "$SHFUNCS_DIR/func-test.sh"
+. "$SHFUNCS_DIR/func-cmd.sh"
 
-OUT_TMP="$shfuncs_dir/test.OUT_TMP_file.tmp"
-OUT_TMP_DIR="$shfuncs_dir/test.OUT_TMP_DIR.tmp"
+OUT_TMP="$SHFUNCS_DIR/test.OUT_TMP_file.tmp"
+OUT_TMP_DIR="$SHFUNCS_DIR/test.OUT_TMP_DIR.tmp"
 mkdir -p "$OUT_TMP_DIR"
 
 unset OPT_DRYRUN

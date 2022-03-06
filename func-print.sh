@@ -21,8 +21,10 @@ if [ -z "${BASH_VERSION:-}${ZSH_VERSION:-}" ] ; then echo Not running bash or zs
 
 typeset -f print_fmt > /dev/null && return
 
-. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-tty-colors.sh"
-. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-args.sh"
+# shellcheck disable=all
+SHFUNCS_DIR=${SHFUNCS_DIR:-$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")}
+. "$SHFUNCS_DIR/func-tty-colors.sh"
+. "$SHFUNCS_DIR/func-args.sh"
 
 _qip_func_print_saved_state=""
 if [[ -n "${BASH_SOURCE:-}" ]] ; then

@@ -21,9 +21,10 @@
 
 set -euo pipefail
 
-shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
-. "$shfuncs_dir/func-test.sh"
-. "$shfuncs_dir/func-findexec.sh"
+# shellcheck disable=all
+SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
+. "$SHFUNCS_DIR/func-test.sh"
+. "$SHFUNCS_DIR/func-findexec.sh"
 
 test_case my_which
 test_assert_equal "$(my_which env)" "$(which env)"

@@ -21,8 +21,10 @@ if [ -z "${BASH_VERSION:-}${ZSH_VERSION:-}" ] ; then echo Not running bash or zs
 
 typeset -f assert_file_exists > /dev/null && return
 
-. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-args.sh"
-. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-print.sh"
+# shellcheck disable=all
+SHFUNCS_DIR=${SHFUNCS_DIR:-$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")}
+. "$SHFUNCS_DIR/func-args.sh"
+. "$SHFUNCS_DIR/func-print.sh"
 
 # shellcheck disable=SC2034
 {

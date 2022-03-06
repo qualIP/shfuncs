@@ -21,9 +21,10 @@
 
 set -euo pipefail
 
-shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
-. "$shfuncs_dir/func-test.sh"
-. "$shfuncs_dir/func-args.sh"
+# shellcheck disable=all
+SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
+. "$SHFUNCS_DIR/func-test.sh"
+. "$SHFUNCS_DIR/func-args.sh"
 
 test_case quote_args
 test_assert_equal "$(quote_args "" a "b c" "e \"f")" "'' a 'b c' 'e \"f'"

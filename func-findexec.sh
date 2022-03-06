@@ -21,7 +21,9 @@ if [ -z "${BASH_VERSION:-}${ZSH_VERSION:-}" ] ; then echo Not running bash or zs
 
 typeset -f findexec > /dev/null && return
 
-. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-print.sh"
+# shellcheck disable=all
+SHFUNCS_DIR=${SHFUNCS_DIR:-$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")}
+. "$SHFUNCS_DIR/func-print.sh"
 
 ## my_which name
 my_which() {

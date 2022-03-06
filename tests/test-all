@@ -21,9 +21,11 @@
 
 set -euo pipefail
 
-shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
-. "$shfuncs_dir/func-test.sh"
+# shellcheck disable=all
+SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
+. "$SHFUNCS_DIR/func-test.sh"
 
+# shellcheck disable=all
 cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")"
 
 for test_file in ./test-* ; do

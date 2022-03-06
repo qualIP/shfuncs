@@ -22,12 +22,13 @@
 #set -euo pipefail
 set -e
 
-shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
-. "$shfuncs_dir/func-test.sh"
-. "$shfuncs_dir/func-git.sh"
-. "$shfuncs_dir/func-cmd.sh"
+# shellcheck disable=all
+SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
+. "$SHFUNCS_DIR/func-test.sh"
+. "$SHFUNCS_DIR/func-git.sh"
+. "$SHFUNCS_DIR/func-cmd.sh"
 
-TEST_TMP_DIR="$shfuncs_dir/test.TEST_TMP_DIR.tmp"
+TEST_TMP_DIR="$SHFUNCS_DIR/test.TEST_TMP_DIR.tmp"
 rm -Rf "$TEST_TMP_DIR"
 
 mkdir "$TEST_TMP_DIR"
@@ -53,14 +54,14 @@ cd ../a
 
 test_case git_dir
 test_assert_equal "$(git_dir)" ".git"
-test_assert_equal "$(GIT_DIR=`pwd`/.git git_dir)" "`pwd`/.git"
+test_assert_equal "$(GIT_DIR=$(pwd)/.git git_dir)" "$(pwd)/.git"
 mkdir sub
 test_assert_equal "$(cd sub && git_dir)" "$TEST_TMP_DIR/a/.git"
 test_assert_equal "$(cd ../b && git_dir)" "$TEST_TMP_DIR/a/.git/worktrees/b"
 
 test_case git_dir
 test_assert_equal "$(git_path "$GIT_MERGE_HEAD_FILE")" ".git/MERGE_HEAD"
-test_assert_equal "$(GIT_DIR=`pwd`/.git git_path "$GIT_MERGE_HEAD_FILE")" "`pwd`/.git/MERGE_HEAD"
+test_assert_equal "$(GIT_DIR=$(pwd)/.git git_path "$GIT_MERGE_HEAD_FILE")" "$(pwd)/.git/MERGE_HEAD"
 
 test_case git_toplevel
 test_assert_equal "$(git_toplevel)" "$TEST_TMP_DIR/a"

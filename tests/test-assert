@@ -21,26 +21,27 @@
 
 set -euo pipefail
 
-shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
-. "$shfuncs_dir/func-test.sh"
-. "$shfuncs_dir/func-assert.sh"
+# shellcheck disable=all
+SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
+. "$SHFUNCS_DIR/func-test.sh"
+. "$SHFUNCS_DIR/func-assert.sh"
 
 test_case assert_file_exists
-test_assert_rc 0 assert_file_exists "$shfuncs_dir/func-assert.sh"
-test_assert_rc 0 assert_file_exists "$shfuncs_dir/"
-test_assert_rc $ENOENT assert_file_exists /does/not/exist
+test_assert_rc 0 assert_file_exists "$SHFUNCS_DIR/func-assert.sh"
+test_assert_rc 0 assert_file_exists "$SHFUNCS_DIR/"
+test_assert_rc "$ENOENT" assert_file_exists /does/not/exist
 
 test_case assert_file_not_exists
-test_assert_rc $EEXIST assert_file_not_exists "$shfuncs_dir/func-assert.sh"
-test_assert_rc $EEXIST assert_file_not_exists "$shfuncs_dir/"
+test_assert_rc "$EEXIST" assert_file_not_exists "$SHFUNCS_DIR/func-assert.sh"
+test_assert_rc "$EEXIST" assert_file_not_exists "$SHFUNCS_DIR/"
 test_assert_rc 0 assert_file_not_exists /does/not/exist
 
 test_case assert_is_file
-test_assert_rc 0 assert_is_file "$shfuncs_dir/func-assert.sh"
-test_assert_rc $EISDIR assert_is_file "$shfuncs_dir/"
-test_assert_rc $ENOENT assert_is_file /does/not/exist
+test_assert_rc 0 assert_is_file "$SHFUNCS_DIR/func-assert.sh"
+test_assert_rc "$EISDIR" assert_is_file "$SHFUNCS_DIR/"
+test_assert_rc "$ENOENT" assert_is_file /does/not/exist
 
 test_case assert_is_directory
-test_assert_rc $ENOENT assert_is_directory "$shfuncs_dir/func-assert.sh"
-test_assert_rc 0 assert_is_directory "$shfuncs_dir/"
-test_assert_rc $ENOENT assert_is_directory /does/not/exist
+test_assert_rc "$ENOENT" assert_is_directory "$SHFUNCS_DIR/func-assert.sh"
+test_assert_rc 0 assert_is_directory "$SHFUNCS_DIR/"
+test_assert_rc "$ENOENT" assert_is_directory /does/not/exist

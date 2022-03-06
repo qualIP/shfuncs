@@ -21,9 +21,10 @@
 
 set -euo pipefail
 
-shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
-. "$shfuncs_dir/func-test.sh"
-. "$shfuncs_dir/func-file.sh"
+# shellcheck disable=all
+SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
+. "$SHFUNCS_DIR/func-test.sh"
+. "$SHFUNCS_DIR/func-file.sh"
 
 test_case fix_path_no_slash
 test_assert_equal "$(fix_path_no_slash "/some/with space/path")" "/some/with space/path"
@@ -42,4 +43,4 @@ test_assert_equal "$(fix_path "/path")" "/path/"
 test_assert_equal "$(fix_path "/")" "/"
 
 test_case find_in_dir
-test_assert_equal "$(find_in_dir "$shfuncs_dir" -name "test-file")" "$shfuncs_dir/tests/test-file"
+test_assert_equal "$(find_in_dir "$SHFUNCS_DIR" -name "test-file")" "$SHFUNCS_DIR/tests/test-file"
