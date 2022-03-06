@@ -73,12 +73,12 @@ test_git_changeset() {
         print_status "Changeset empty" PASS
     else
         log_cmd_live_pty git status
-	# On branch master
-	# No commits yet
+        # On branch master
+        # No commits yet
         if ${GREP:-grep} -q "^nothing to commit, \(worktree\|working tree\) clean" "$OUT_TMP" ; then
             print_status "Worktree clean" PASS
         elif ${GREP:-grep} -q "^nothing to commit (create/copy files and use \"git add\" to track)" "$OUT_TMP" ; then
-	    # nothing to commit (create/copy files and use "git add" to track)
+            # nothing to commit (create/copy files and use "git add" to track)
             print_status "Worktree clean" PASS
         elif ${GREP:-grep} -q "^nothing added to commit but untracked files present" "$OUT_TMP" ; then
             if $untracked_ok ; then
