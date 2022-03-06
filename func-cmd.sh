@@ -163,11 +163,11 @@ log_cmd() {
     fi
     if [[ $rc != 0 ]] ; then
         if [[ -s "$loc_OUT_TMP" ]] ; then
-            print_err "$(<"$loc_OUT_TMP")" |& indent >&2
+            { print_err "$(<"$loc_OUT_TMP")" 2>&1 ; } | indent >&2
         fi
     elif $OPT_VERBOSE ; then
         if [[ -s "$loc_OUT_TMP" ]] ; then
-            print_dbg "$(<"$loc_OUT_TMP")" |& indent >&2
+            { print_dbg "$(<"$loc_OUT_TMP")" 2>&1 ; } | indent >&2
         fi
     fi
     [[ "$loc_OUT_TMP" = "${OUT_TMP:-}" ]] || rm -f "$loc_OUT_TMP"
@@ -189,7 +189,7 @@ log_cmd_quiet() {
         print_need_nl
         print_cmd_status "$cmd" ERROR "($rc)"
         if [[ -s "$loc_OUT_TMP" ]] ; then
-            print_err "$(<"$loc_OUT_TMP")" |& indent >&2
+            { print_err "$(<"$loc_OUT_TMP")" 2>&1 ; } | indent >&2
         fi
     fi
     [[ "$loc_OUT_TMP" = "${OUT_TMP:-}" ]] || rm -f "$loc_OUT_TMP"
@@ -222,12 +222,12 @@ log_cmd_long() {
     fi
     if [[ $rc != 0 ]] ; then
         if [[ -s "$loc_OUT_TMP" ]] ; then
-            print_err "$(<"$loc_OUT_TMP")" |& indent >&2
+            { print_err "$(<"$loc_OUT_TMP")" 2>&1 ; } | indent >&2
         fi
     elif $OPT_VERBOSE ; then
         if false ; then
             if [[ -s "$loc_OUT_TMP" ]] ; then
-                print_dbg "$(<"$loc_OUT_TMP")" |& indent >&2
+                { print_dbg "$(<"$loc_OUT_TMP")" 2>&1 ; } | indent >&2
             fi
         fi
     fi
@@ -298,7 +298,7 @@ log_cmd_live_nohup_quiet() {
         print_need_nl
         print_cmd_status "$cmd" ERROR "($rc)"
         if [[ -s "$loc_OUT_TMP" ]] ; then
-            print_err "$(<"$loc_OUT_TMP")" |& indent >&2
+            { print_err "$(<"$loc_OUT_TMP")" 2>&1 ; } | indent >&2
         fi
     fi
     [[ "$loc_OUT_TMP" = "${OUT_TMP:-}" ]] || rm -f "$loc_OUT_TMP"
@@ -344,7 +344,7 @@ log_cmd_live_pty_quiet() {
         print_need_nl
         print_cmd_status "$cmd" ERROR "($rc)"
         if [[ -s "$loc_OUT_TMP" ]] ; then
-            print_err "$(<"$loc_OUT_TMP")" |& indent_esc >&2
+            { print_err "$(<"$loc_OUT_TMP")" 2>&1 ; } | indent_esc >&2
         fi
     fi
     [[ "$loc_OUT_TMP" = "${OUT_TMP:-}" ]] || rm -f "$loc_OUT_TMP"
