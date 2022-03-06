@@ -53,15 +53,27 @@ cd ../a
 
 test_case git_dir
 test_assert_equal "$(git_dir)" ".git"
+test_assert_equal "$(GIT_DIR=`pwd`/.git git_dir)" "`pwd`/.git"
 mkdir sub
 test_assert_equal "$(cd sub && git_dir)" "$TEST_TMP_DIR/a/.git"
 test_assert_equal "$(cd ../b && git_dir)" "$TEST_TMP_DIR/a/.git/worktrees/b"
+
+test_case git_dir
+test_assert_equal "$(git_path "$GIT_MERGE_HEAD_FILE")" ".git/MERGE_HEAD"
+test_assert_equal "$(GIT_DIR=`pwd`/.git git_path "$GIT_MERGE_HEAD_FILE")" "`pwd`/.git/MERGE_HEAD"
 
 test_case git_toplevel
 test_assert_equal "$(git_toplevel)" "$TEST_TMP_DIR/a"
 #mkdir sub
 test_assert_equal "$(cd sub && git_toplevel)" "$TEST_TMP_DIR/a"
 test_assert_equal "$(cd ../b && git_toplevel)" "$TEST_TMP_DIR/b"
+
+test_case git_state
+test_assert_equal "$(git_state)" ""
+git bisect start
+test_assert_equal "$(git_state)" "bisect"
+git bisect reset
+test_assert_equal "$(git_state)" ""
 
 popd > /dev/null
 
