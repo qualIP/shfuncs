@@ -17,11 +17,12 @@
 # shfuncs; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-if [ -z "$BASH_VERSION" ] ; then echo Not running bash! >&2 ; exit 1 ; fi
+if [ -z "${BASH_VERSION:-}${ZSH_VERSION:-}" ] ; then echo Not running bash or zsh! >&2 ; exit 1 ; fi
 
-declare -F log_cmd > /dev/null && return
+typeset -f log_cmd > /dev/null && return
 
-. "$(dirname "${BASH_SOURCE[0]}")/func-print.sh"
+. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-print.sh"
+. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-args.sh"
 
 ## run_indent cmd ...
 #
@@ -29,7 +30,7 @@ declare -F log_cmd > /dev/null && return
 # stdout is indented then sent to stdout.
 # stderr is not redirected.
 run_indent() {
-    local state ; state=$(set +o) ; shopt -qo errexit && state="$state ; set -e"
+    local state ; state=$(set +o) ; [[ -n "${BASH_SOURCE:-}" ]] && shopt -qo errexit && state="$state ; set -e"
     set -o pipefail
     if "$@" | indent
     then local rc=0 ; else local rc=$? ; fi
@@ -44,7 +45,7 @@ run_indent() {
 # Indentation supports reformatting terminal escape sequences.
 # stderr is not redirected.
 run_indent_esc() {
-    local state ; state=$(set +o) ; shopt -qo errexit && state="$state ; set -e"
+    local state ; state=$(set +o) ; [[ -n "${BASH_SOURCE:-}" ]] && shopt -qo errexit && state="$state ; set -e"
     set -o pipefail
     if "$@" | indent_esc
     then local rc=0 ; else local rc=$? ; fi
@@ -85,7 +86,7 @@ run_cmd_redirected_pty() {
 # stdout and stderr are both copied to file and output on stdout.
 run_cmd_piped() {
     local file="$1" ; shift
-    local state ; state=$(set +o) ; shopt -qo errexit && state="$state ; set -e"
+    local state ; state=$(set +o) ; [[ -n "${BASH_SOURCE:-}" ]] && shopt -qo errexit && state="$state ; set -e"
     set -o pipefail
     if { "$@" ; } | tee "$file" 2>&1
     then local rc=0 ; else local rc=$? ; fi

@@ -21,7 +21,7 @@
 
 set -euo pipefail
 
-shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
 . "$shfuncs_dir/func-test.sh"
 . "$shfuncs_dir/func-uri.sh"
 

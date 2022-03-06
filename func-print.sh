@@ -17,40 +17,54 @@
 # shfuncs; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-if [ -z "$BASH_VERSION" ] ; then echo Not running bash! >&2 ; exit 1 ; fi
+if [ -z "${BASH_VERSION:-}${ZSH_VERSION:-}" ] ; then echo Not running bash or zsh! >&2 ; exit 1 ; fi
 
-declare -F print_fmt > /dev/null && return
+typeset -f print_fmt > /dev/null && return
 
-. "$(dirname "${BASH_SOURCE[0]}")/func-tty-colors.sh"
-. "$(dirname "${BASH_SOURCE[0]}")/func-args.sh"
+. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-tty-colors.sh"
+. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-args.sh"
 
 _qip_func_print_saved_state=""
-shopt -q extglob || _qip_func_args_saved_state+="shopt -u extglob"$'\n' ; shopt -s extglob
+if [[ -n "${BASH_SOURCE:-}" ]] ; then
+    shopt -q extglob || _qip_func_args_saved_state+="shopt -u extglob"$'\n' ; shopt -s extglob
+fi
 
 _last_print_is_nl=false
 
-## print [str ...]
+## _print [str ...]
 #
 # Prints the arguments, just like `echo`.
 # Tracks newlines just like all print functions in this library.
-print() {
+_print() {
     local v="$*"
     echo "$v"
     [[ -n "$v" ]] && _last_print_is_nl=false || _last_print_is_nl=true
 }
 
+if [[ -z "${ZSH_VERSION:-}" ]] ; then
+    # Zsh defines "print()"
+
+    ## _print [str ...]
+    #
+    # Prints the arguments, just like `echo`.
+    # Tracks newlines just like all print functions in this library.
+    print() {
+        _print "$@"
+    }
+fi
+
 ## print_nl
 #
 # Prints a new line
 print_nl() {
-    print ""
+    _print ""
 }
 
 ## print_need_nl
 #
 # Prints a new line, unless the last print was an empty line.
 print_need_nl() {
-    ${_last_print_is_nl:-false} || print ""
+    ${_last_print_is_nl:-false} || _print ""
 }
 
 ## indent [file ...]
@@ -94,13 +108,13 @@ print_fmt() {
 #
 # Prints the error message to standard error in red and with "**" markers around it.
 print_err() {
-    print "${hoPRE:-}${cRED:-}** $* **${cOFF:-}${hcPRE:-}" >&2
+    _print "${hoPRE:-}${cRED:-}** $* **${cOFF:-}${hcPRE:-}" >&2
 }
 
 #
 # Prints the debug message to standard error in yellow.
 print_dbg() {
-    print "${hoPRE:-}${cYELLOW:-}$*${cOFF:-}${hcPRE:-}" >&2
+    _print "${hoPRE:-}${cYELLOW:-}$*${cOFF:-}${hcPRE:-}" >&2
 }
 
 ## print_q "q" [choices]
@@ -235,17 +249,17 @@ print_value() {
 _print_shell_type=
 
 print_set_var_csh() {
-    print set "$1"="$(quote_args "$2")"
+    _print set "$1"="$(quote_args "$2")"
 }
 print_set_var_sh() {
-    print "$1"="$(quote_args "$2")"
+    _print "$1"="$(quote_args "$2")"
 }
 
 print_source_csh() {
-    print source "$(quote_args "$1")"
+    _print source "$(quote_args "$1")"
 }
 print_source_sh() {
-    print . "$(quote_args "$1")"
+    _print . "$(quote_args "$1")"
 }
 
 set_print_shell_type() {
@@ -283,28 +297,28 @@ set_debug_mode() {
 
 print_h1() {
     print_need_nl
-    print "${hoPRE:-}${cBLUE:-}# $*${cOFF:-}${hcPRE:-}"
-    print ""
+    _print "${hoPRE:-}${cBLUE:-}# $*${cOFF:-}${hcPRE:-}"
+    _print ""
 }
 
 print_h2() {
     print_need_nl
-    print "${hoPRE:-}${cBLUE:-}## $*${cOFF:-}${hcPRE:-}"
-    print ""
+    _print "${hoPRE:-}${cBLUE:-}## $*${cOFF:-}${hcPRE:-}"
+    _print ""
 }
 
 print_h3() {
     print_need_nl
-    print "${hoPRE:-}${cBLUE:-}### $*${cOFF:-}${hcPRE:-}"
-    print ""
+    _print "${hoPRE:-}${cBLUE:-}### $*${cOFF:-}${hcPRE:-}"
+    _print ""
 }
 
 print_em() {
-    print "${hoPRE:-}${cBLUEb:-}*$**${cOFF:-}${hcPRE:-}"
+    _print "${hoPRE:-}${cBLUEb:-}*$**${cOFF:-}${hcPRE:-}"
 }
 
 print_li() {
-    print "${hoPRE:-}- ${cBLACKb:-}$*${cOFF:-}${hcPRE:-}"
+    _print "${hoPRE:-}- ${cBLACKb:-}$*${cOFF:-}${hcPRE:-}"
 }
 
 ## print_vars var1 var2 ...

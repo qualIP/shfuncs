@@ -9,5 +9,11 @@ help:
 check:
 	shellcheck --norc --shell=bash --format=gcc func-*.sh tests/test-*
 
-test:
+.PHONY: test-bash test-zsh
+test: test-bash test-zsh
+
+test-bash:
 	./tests/test-all
+
+test-zsh:
+	zsh ./tests/test-all

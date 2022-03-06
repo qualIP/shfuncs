@@ -17,15 +17,19 @@
 # shfuncs; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-if [ -z "$BASH_VERSION" ] ; then echo Not running bash! >&2 ; exit 1 ; fi
+if [ -z "${BASH_VERSION:-}${ZSH_VERSION:-}" ] ; then echo Not running bash or zsh! >&2 ; exit 1 ; fi
 
-declare -F quote_args > /dev/null && return
+typeset -f quote_args > /dev/null && return
 
 OPT_DEBUG=${OPT_DEBUG:-false}
 OPT_VERBOSE=${OPT_VERBOSE:-false}
 
 _qip_func_args_saved_state=""
-shopt -q extglob || _qip_func_args_saved_state+="shopt -u extglob"$'\n' ; shopt -s extglob
+if [[ -n "${BASH_VERSION:-}" ]] ; then
+    shopt -q extglob || _qip_func_args_saved_state+="shopt -u extglob"$'\n' ; shopt -s extglob
+elif [[ -n "${ZSH_VERSION:-}" ]] ; then
+    setopt KSH_GLOB
+fi
 
 quote_args() {
     local ret='' arg sfx

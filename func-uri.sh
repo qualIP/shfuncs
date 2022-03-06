@@ -17,9 +17,9 @@
 # shfuncs; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-if [ -z "$BASH_VERSION" ] ; then echo Not running bash! >&2 ; exit 1 ; fi
+if [ -z "${BASH_VERSION:-}${ZSH_VERSION:-}" ] ; then echo Not running bash or zsh! >&2 ; exit 1 ; fi
 
-declare -F make_url > /dev/null && return
+typeset -f make_url > /dev/null && return
 
 ## make_url url [arg value] ...
 make_url() {

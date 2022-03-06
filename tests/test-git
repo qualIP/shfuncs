@@ -22,7 +22,7 @@
 #set -euo pipefail
 set -e
 
-shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+shfuncs_dir=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
 . "$shfuncs_dir/func-test.sh"
 . "$shfuncs_dir/func-git.sh"
 . "$shfuncs_dir/func-cmd.sh"

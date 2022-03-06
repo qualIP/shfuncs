@@ -17,10 +17,10 @@
 # shfuncs; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-if [ -z "$BASH_VERSION" ] ; then echo Not running bash! >&2 ; exit 1 ; fi
+if [ -z "${BASH_VERSION:-}${ZSH_VERSION:-}" ] ; then echo Not running bash or zsh! >&2 ; exit 1 ; fi
 
 # Might want to be able re-source...
-declare -F setup_tty_colors > /dev/null && return
+typeset -f setup_tty_colors > /dev/null && return
 
 # shellcheck disable=SC2034
 tty_colors_off() {

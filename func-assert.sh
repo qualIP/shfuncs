@@ -17,12 +17,12 @@
 # shfuncs; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-if [ -z "$BASH_VERSION" ] ; then echo Not running bash! >&2 ; exit 1 ; fi
+if [ -z "${BASH_VERSION:-}${ZSH_VERSION:-}" ] ; then echo Not running bash or zsh! >&2 ; exit 1 ; fi
 
-declare -F assert_file_exists > /dev/null && return
+typeset -f assert_file_exists > /dev/null && return
 
-. "$(dirname "${BASH_SOURCE[0]}")/func-args.sh"
-. "$(dirname "${BASH_SOURCE[0]}")/func-print.sh"
+. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-args.sh"
+. "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/func-print.sh"
 
 # shellcheck disable=SC2034
 {
