@@ -21,6 +21,13 @@ if [ -z "${BASH_VERSION:-}${ZSH_VERSION:-}" ] ; then echo Not running bash or zs
 
 typeset -f test_git_changeset > /dev/null && return
 
+_qip_func_git_saved_state=""
+if [[ -n "${BASH_VERSION:-}" ]] ; then
+    shopt -q extglob || _qip_func_git_saved_state+="shopt -u extglob"$'\n' ; shopt -s extglob
+elif [[ -n "${ZSH_VERSION:-}" ]] ; then
+    setopt KSH_GLOB
+fi
+
 # shellcheck disable=all
 SHFUNCS_DIR=${SHFUNCS_DIR:-$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")}
 . "$SHFUNCS_DIR/func-cmd.sh"
@@ -125,6 +132,14 @@ git_toplevel() {
     git rev-parse --show-toplevel
 }
 
+## git_repo [remote]
+git_repo() {
+    local git_repo=
+    git_repo=$(git remote get-url "${1:-origin}")
+    [[ -n "$git_repo" ]] && git_repo=$(basename "$git_repo" .git)
+    echo "$git_repo"
+}
+
 ## git_state
 git_state() {
     # See https://github.com/libgit2/libgit2/blob/main/src/libgit2/repository.c
@@ -158,5 +173,30 @@ git_state() {
         echo "bisect"
     fi
 }
+
+# TODO this is not inclusive enough -- See: git check-ref-format
+is_git_branch_name() {
+    case "$1" in
+        *..*|*.) return 1 ;;
+        *//*|/*|*/) return 1 ;;
+        -*) return 1 ;;
+        +([A-Za-z0-9_/.+-])) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+git_branch_exists() {
+    local v
+    sha=$(git show-ref "refs/heads/$1")
+    [[ -n "$sha" ]]
+}
+
+git_remote_branch_exists() {
+    local v
+    sha=$(git show-ref "refs/remotes/$1")
+    [[ -n "$sha" ]]
+}
+
+eval "$_qip_func_git_saved_state" ; unset _qip_func_git_saved_state
 
 # vim: ft=bash
