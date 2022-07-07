@@ -30,13 +30,13 @@ my_which() {
     local arg="$1"
     case "$arg" in
         /*)
-            if [ -f "$arg" ] && [ -x "$arg" ] ; then
+            if [[ -f "$arg" ]] && [[ -x "$arg" ]] ; then
                 echo "$arg"
                 return 0
             fi
             ;;
         */*)
-            if [ -f "$arg" ] && [ -x "$arg" ] ; then
+            if [[ -f "$arg" ]] && [[ -x "$arg" ]] ; then
                 echo "$(pwd)/$arg"
                 return 0
             fi
@@ -46,8 +46,8 @@ my_which() {
             local old_IFS="$IFS" ; IFS=":"
             for p in $PATH ; do
                 IFS="$old_IFS"
-                [ -z "$p" ] && p="."
-                if [ -f "$p/$arg" ] && [ -x "$p/$arg" ] ; then
+                [[ -z "$p" ]] && p="."
+                if [[ -f "$p/$arg" ]] && [[ -x "$p/$arg" ]] ; then
                     echo "$p/$arg"
                     return 0
                 fi
@@ -61,11 +61,11 @@ my_which() {
 findexec() {
     local p
     for p in "$@" ; do
-        if [ "${p:0:1}" != "/" ] ; then
+        if [[ "${p:0:1}" != "/" ]] ; then
             p=$(my_which "$p" 2>/dev/null) || continue
-            [ "${p:0:1}" = "/" ] || continue
+            [[ "${p:0:1}" = "/" ]] || continue
         fi
-        [ -x "$p" ] && echo "$p" && return
+        [[ -x "$p" ]] && echo "$p" && return
     done
     print_err Executable not found: "$@"
     return 1
@@ -83,16 +83,16 @@ next_in_path() {
     for p in $pathenv ; do
         IFS="$old_IFS"
         if $bindir_found ; then
-            if [ -x "$p/$binname" ] ; then
+            if [[ -x "$p/$binname" ]] ; then
                 echo "$p/$binname"
                 return 0
             fi
         else
-            if [ "$p" = "$bindir" ] ; then
+            if [[ "$p" = "$bindir" ]] ; then
                 bindir_found=true
-            elif [ -x "$p/$binname" ] ; then
+            elif [[ -x "$p/$binname" ]] ; then
                 p=$( (cd "$p" && pwd) )
-                if [ "$p" = "$bindir" ] ; then
+                if [[ "$p" = "$bindir" ]] ; then
                     bindir_found=true
                 fi
             fi
@@ -107,7 +107,7 @@ _realpath() {
     local f d d1 d2
     local p=$1
     local l ; l=$(readlink "$p")
-    if [ -n "$l" ] ; then
+    if [[ -n "$l" ]] ; then
         d1=$(dirname "$p")
         d2=$(dirname "$l")
         d=$(cd "$d1" && cd "$d2" && pwd) || return $?
@@ -121,7 +121,7 @@ _realpath() {
     return 0
 }
 
-if [ ! -f "$(my_which realpath 2> /dev/null)" ] ; then
+if [[ ! -f "$(my_which realpath 2> /dev/null)" ]] ; then
     alias realpath=_realpath
 fi
 

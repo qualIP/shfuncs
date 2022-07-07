@@ -396,7 +396,7 @@ log_cmd_nostatus() {
 log_cmd_nostatus_quiet() {
     local cmd ; cmd=$(quote_args "$@")
     local rc=0 ; "$@" >& /dev/null || rc=$?
-    if [ $rc != 0 ] ; then
+    if [[ $rc != 0 ]] ; then
         print_cmd_status "$cmd" ERROR "($rc)"
     fi
     return $rc
@@ -421,7 +421,7 @@ log_cmd_nostatus_interactive() {
 log_cmd_nostatus_interactive_quiet() {
     local cmd ; cmd=$(quote_args "$@")
     local rc=0 ; "$@" >& /dev/null || rc=$?
-    if [ $rc != 0 ] ; then
+    if [[ $rc != 0 ]] ; then
         print_need_nl
         print_cmd_status "$cmd" ERROR "($rc)"
     fi
@@ -447,7 +447,7 @@ log_cmd_interactive() {
 
 log_cmd_interactive_quiet() {
     local rc=0 ; log_cmd_nostatus_interactive_quiet "$@" || rc=$?
-    if [ $rc != 0 ] ; then
+    if [[ $rc != 0 ]] ; then
         print_need_nl
         print_cmd_status "$cmd" ERROR "($rc)"
     fi
@@ -477,7 +477,7 @@ log_cmd_nostatus_shell_quiet() {
     # Using "$cmd" instead of "$@" because eval concatenates spaces
     if eval "$cmd" >& /dev/null
     then local rc=0 ; else local rc=$? ; fi
-    if [ $rc != 0 ] ; then
+    if [[ $rc != 0 ]] ; then
         print_need_nl
         print_cmd_status "$cmd" ERROR "($rc)"
     fi

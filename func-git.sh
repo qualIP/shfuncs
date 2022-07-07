@@ -78,7 +78,7 @@ test_git_changeset() {
     # Use? git diff-index --quiet HEAD --
     if false ; then
         log_cmd_live git diff --name-status
-        if [ -s "$OUT_TMP" ] ; then
+        if [[ -s "$OUT_TMP" ]] ; then
             print_status "Changeset not empty" FAIL
             return 1
         fi

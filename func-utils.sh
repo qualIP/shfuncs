@@ -35,9 +35,9 @@ _utils_trap_handler() {
         *)    echo "Unrecognized trap ($_utils_signal_name)" >&2 ; _utils_signal_value=127 ;;
     esac
 
-    [ -n "$_utils_cleanup_function" ] && eval "$_utils_cleanup_function"
+    [[ -n "$_utils_cleanup_function" ]] && eval "$_utils_cleanup_function"
 
-    if [ "$_utils_signal_name" != "EXIT" ] ; then
+    if [[ "$_utils_signal_name" != "EXIT" ]] ; then
         trap 0 ;# Disable exit trap
         exit $((_utils_signal_value + 128))
     fi
@@ -82,15 +82,15 @@ utils_run_curl() {
         -o "$loc_OUT_TMP" \
         $(${OPT_DEBUG:-false} && echo "-v") \
         "$@")"
-    if [ "$HTTP_CODE" != "200" ] ; then
+    if [[ "$HTTP_CODE" != "200" ]] ; then
         print_err "Error: Request returned code $HTTP_CODE."
-        if [ -f "$loc_OUT_TMP" ] ; then
+        if [[ -f "$loc_OUT_TMP" ]] ; then
             cat "$loc_OUT_TMP" >&2
             rm -f "$loc_OUT_TMP"
         fi
         return 1
     else
-        if [ -f "$loc_OUT_TMP" ] ; then
+        if [[ -f "$loc_OUT_TMP" ]] ; then
             cat "$loc_OUT_TMP"
             rm -f "$loc_OUT_TMP"
         fi

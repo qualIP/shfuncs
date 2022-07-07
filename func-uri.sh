@@ -25,7 +25,7 @@ typeset -f make_url > /dev/null && return
 make_url() {
     local url="$1" ; shift
     local sep="?"
-    while [ $# -gt 0 ] ; do
+    while [[ $# -gt 0 ]] ; do
         url="$url$sep$1=$(encode_pct "$2")"
         shift 2
         sep="&"
@@ -35,7 +35,7 @@ make_url() {
 
 ## get_query_var [var]
 get_query_var() {
-    if [ -n "${1:-}" ] ; then
+    if [[ -n "${1:-}" ]] ; then
         decode_pct "$(${SED:-sed} -n -e 's/^\(.*&\)\?'"$1"'=\([^&]*\).*$/\2/p' <<< "$QUERY_STRING")"
     else
         decode_pct "$QUERY_STRING"

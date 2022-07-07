@@ -175,12 +175,12 @@ assert_file_exists() {
     case "$1" in
         -v) loc_OPT_VERBOSE=true ; shift ;;
     esac
-    if [ $# != 1 ] ; then
+    if [[ $# != 1 ]] ; then
         print_err "Invalid arguments: $(quote_args "$@")"
         return $EINVAL
     fi
     local file="$1" ; shift
-    if ! [ -e "$file" ] ; then
+    if ! [[ -e "$file" ]] ; then
         print_err "$file: No such file or directory"
         return $ENOENT
     else
@@ -194,12 +194,12 @@ assert_file_not_exists() {
     case "$1" in
         -v) loc_OPT_VERBOSE=true ; shift ;;
     esac
-    if [ $# != 1 ] ; then
+    if [[ $# != 1 ]] ; then
         print_err "Invalid arguments: $(quote_args "$@")"
         return $EINVAL
     fi
     local file="$1" ; shift
-    if [ -e "$file" ] ; then
+    if [[ -e "$file" ]] ; then
         print_err "$file: File or directory exists"
         return $EEXIST
     else
@@ -213,15 +213,15 @@ assert_is_file() {
     case "$1" in
         -v) loc_OPT_VERBOSE=true ; shift ;;
     esac
-    if [ $# != 1 ] ; then
+    if [[ $# != 1 ]] ; then
         print_err "Invalid arguments: $(quote_args "$@")"
         return $EINVAL
     fi
     local file="$1" ; shift
-    if ! [ -f "$file" ] ; then
-        if [ -e "$file" ] ; then
+    if ! [[ -f "$file" ]] ; then
+        if [[ -e "$file" ]] ; then
             print_err "$file: Not a file"
-            if [ -d "$file" ] ; then
+            if [[ -d "$file" ]] ; then
                 return $EISDIR
             fi
             return $EEXIST
@@ -240,13 +240,13 @@ assert_is_directory() {
     case "$1" in
         -v) loc_OPT_VERBOSE=true ; shift ;;
     esac
-    if [ $# != 1 ] ; then
+    if [[ $# != 1 ]] ; then
         print_err "Invalid arguments: $(quote_args "$@")"
         return $EINVAL
     fi
     local file="$1" ; shift
-    if ! [ -d "$file" ] ; then
-        if [ -e "$file" ] ; then
+    if ! [[ -d "$file" ]] ; then
+        if [[ -e "$file" ]] ; then
             print_err "$file: Not a directory"
             # For consistency... return $ENOTDIR
             return $ENOENT

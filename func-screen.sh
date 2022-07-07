@@ -23,9 +23,9 @@ typeset -f screen_new_window > /dev/null && return
 
 ## screen_new_window [args ...]
 screen_new_window() {
-    if [ "${WINDOW:+set}" = "set" ] ; then
+    if [[ "${WINDOW:+set}" = "set" ]] ; then
         screen -X screen "$@"
-    elif [ "${TMUX:+set}" = "set" ] ; then
+    elif [[ "${TMUX:+set}" = "set" ]] ; then
         tmux new-window "$@"
     else
         echo "Not running under screen/tmux!" >&2
@@ -35,9 +35,9 @@ screen_new_window() {
 
 ## screen_set_title [title ...]
 screen_set_title() {
-    if [ "${WINDOW:+set}" = "set" ] ; then
+    if [[ "${WINDOW:+set}" = "set" ]] ; then
         screen -p "$WINDOW" -X title "$*"
-    elif [ "${TMUX_PANE:+set}" = "set" ] ; then
+    elif [[ "${TMUX_PANE:+set}" = "set" ]] ; then
         tmux rename-window -t "$TMUX_PANE" "$*"
     else
         # Assume compatible with xterm control sequences:

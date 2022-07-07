@@ -190,7 +190,7 @@ lsubst() {
     local to="$1" ; shift
     local ret='' v
     for v in "$@" ; do
-        [ "$v" = "$from" ] && v="$to"
+        [[ "$v" = "$from" ]] && v="$to"
         ret="$ret $v"
     done
     # shellcheck disable=SC2086
