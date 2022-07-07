@@ -52,6 +52,23 @@ utils_set_cleanup_function() {
     trap '_utils_trap_handler TERM' 15
 }
 
+_curl_get_compressed_arg_known=false
+_curl_get_compressed_arg=
+curl_get_compressed_arg() {
+    if ! $_curl_get_compressed_arg_known ; then
+        local out=$(${CURL:-curl} --help)
+        if [[ "$out" =~ --compressed ]] ; then
+            _curl_get_compressed_arg=--compressed
+        elif [[ "$out" =~ --compress ]] ; then
+            _curl_get_compressed_arg=--compress
+        else
+            _curl_get_compressed_arg=
+        fi
+        _curl_get_compressed_arg_known=true
+    fi
+    echo "$_curl_get_compressed_arg"
+}
+
 ## utils_run_curl [curl ...] url
 utils_run_curl() {
     local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
@@ -59,7 +76,7 @@ utils_run_curl() {
     HTTP_CODE=
     # shellcheck disable=SC2046
     eval "$(${OPT_DEBUG:-false} && set -x ; ${CURL:-curl} \
-        --compress \
+        $(curl_get_compressed_arg) \
         --silent \
         -w 'HTTP_CODE=%{http_code}' \
         -o "$loc_OUT_TMP" \
