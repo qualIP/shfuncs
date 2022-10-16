@@ -49,4 +49,18 @@ find_in_dir() {
     (cd "$dir" && "${FIND:-find}" $opt . "$@") | ${SED:-sed} -e "s@^\./@$dir/@" -e "s@///*@/@g"
 }
 
+## is_temp_file file
+is_temp_file() {
+  local file=$1
+  if [[ -n "${TMPDIR:-}" ]] ; then
+      if [[ "${file:0:${#TMPDIR}}" = "$TMPDIR" ]] ; then
+          return 0
+      fi
+  fi
+  case "$file" in
+    /tmp/*|/var/tmp/*) return 0 ;;
+  esac
+  return 1
+}
+
 # vim: ft=bash

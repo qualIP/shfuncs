@@ -44,3 +44,11 @@ test_assert_equal "$(fix_path "/")" "/"
 
 test_case find_in_dir
 test_assert_equal "$(find_in_dir "$SHFUNCS_DIR" -name "test-file")" "$SHFUNCS_DIR/tests/test-file"
+
+test_case is_temp_file-false
+test_assert_rc 1 is_temp_file "$SHFUNCS_DIR/func-file.sh"
+
+test_case is_temp_file-true
+test_assert_rc 0 is_temp_file /var/tmp/abc
+test_assert_rc 0 is_temp_file /tmp/abc
+TMPDIR=$SHFUNCS_DIR test_assert_rc 0 is_temp_file "$SHFUNCS_DIR/func-file.sh"
