@@ -122,7 +122,7 @@ lappend() {
 
 ## lpop var [outvar=lpop_value]
 #
-# Modify the specified variable by appending it with all other arguments
+# Modify the specified variable by popping the first element
 lpop() {
     local _lpop_var="$1" ; shift
     if (( $# )) ; then
