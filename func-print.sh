@@ -126,14 +126,21 @@ print_dbg() {
     _print "${hoPRE:-}${cYELLOW:-}$*${cOFF:-}${hcPRE:-}" >&2
 }
 
-## print_q "q" [choices]
+## print_q "q" [choices] [default]
 #
 # Prints a question prompt. Ends with a space, not a newline.
 print_q() {
     local q=$1 ; shift
     [[ "${q: -1}" = "?" ]] || [[ "${q: -1}" = ":" ]] || q="$q:"
-    local choices=${1:-} ; shift || true
-    [[ -n "$choices" ]] && choices=" [$choices]"
+    local choices=
+    if (( $# > 0 )) ; then
+        choices=$1 ; shift
+        [[ -n "$choices" ]] && choices=" ($choices)"
+    fi
+    if (( $# > 0 )) ; then
+        default=$1 ; shift
+        choices+=" [$default]"
+    fi
     print_need_nl
     print_fmt "${cMAGENTA:-}" "$q$choices " "$@"
 }
