@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# Copyright © 2021 qualIP Software
+#
+# This file is part of shfuncs:
+#
+#     https://github.com/qualIP/shfuncs
+#
+# shfuncs is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3.0 of the License, or (at your option)
+# any later version.
+#
+# shfuncs is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with shfuncs; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+set -euo pipefail
+
+# shellcheck disable=all
+SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
+. "$SHFUNCS_DIR/func-test.sh"
+. "$SHFUNCS_DIR/func-hook.sh"
+
+test_case hook_declare
+test_assert_equal "${!_hook_test_hook_1_*}" ""
+hook_declare test_hook_1
+test_assert_equal "${!_hook_test_hook_1_*}" "_hook_test_hook_1_"
+test_assert_equal "$_hook_test_hook_1_" ""
+
+test_case hook_declare-2
+_hook_test_hook_1_="a b c"
+test_assert_equal "${!_hook_test_hook_1_*}" "_hook_test_hook_1_"
+test_assert_equal "$_hook_test_hook_1_" "a b c"
+hook_declare test_hook_1
+test_assert_equal "${!_hook_test_hook_1_*}" "_hook_test_hook_1_"
+test_assert_equal "$_hook_test_hook_1_" ""
+
+test_case hook_get-1
+test_assert_equal "$_hook_test_hook_1_" ""
+test_assert_equal "$(hook_get test_hook_1)" ""
+_hook_test_hook_1_="a b c"
+test_assert_equal "$(hook_get test_hook_1)" "a b c"
+_hook_test_hook_1_=""
+test_assert_equal "$(hook_get test_hook_1)" ""
+
+test_case hook_add
+hook_add test_hook_1 A
+test_assert_equal "$(hook_get test_hook_1)" "A"
+hook_add test_hook_1 B
+test_assert_equal "$(hook_get test_hook_1)" "A B"
+
+test_case hook_invoke
+hook_declare test_hook_1
+ret0() { echo A ; return 0 ; }
+ret5() { echo B ; return 5 ; }
+ret6() { echo C ; return 6 ; }
+hook_add test_hook_1 ret0
+test_assert_rc 0 hook_invoke test_hook_1
+test_assert_equal "$(hook_invoke test_hook_1)" "A"
+hook_add test_hook_1 ret5
+test_assert_rc 5 hook_invoke test_hook_1
+test_assert_equal "$(hook_invoke test_hook_1 || true)" $'A\nB'
+hook_add test_hook_1 ret6
+test_assert_rc 5 hook_invoke test_hook_1
+test_assert_equal "$(hook_invoke test_hook_1 || true)" $'A\nB'
