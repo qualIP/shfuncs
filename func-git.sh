@@ -34,6 +34,7 @@ SHFUNCS_DIR=${SHFUNCS_DIR:-$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")}
 . "$SHFUNCS_DIR/func-assert.sh"
 . "$SHFUNCS_DIR/func-print.sh"
 . "$SHFUNCS_DIR/func-utils.sh"
+. "$SHFUNCS_DIR/func-hook.sh"
 
 # shellcheck disable=SC2034
 EGIT_BISECT_CANT_TEST=125
@@ -230,11 +231,43 @@ git_repo() {
     echo "$git_repo"
 }
 
+## _git_sequencer_get_last_command
+_git_sequencer_get_last_command() {
+    local git_dir ; git_dir=$(git_dir)
+    local command
+    local rest
+    if [[ -f "$git_dir/$GIT_SEQUENCER_TODO_FILE" ]] ; then
+        if read command rest < "$git_dir/$GIT_SEQUENCER_TODO_FILE"
+        then
+            case "$command" in
+                p|pick) echo "pick" ; return 0 ;;
+                revert) echo "revert" ; return 0 ;;
+            esac
+        fi
+    fi
+    # return 1
+}
+
 ## git_state
 git_state() {
     # See https://github.com/libgit2/libgit2/blob/main/src/libgit2/repository.c
     # Much faster to use $git_dir than rely on git_path for every file.
     local git_dir ; git_dir=$(git_dir)
+    local git_state
+    local hook_func
+    for hook_func in $(hook_get git_state) ; do
+        # $hook_func "$git_dir"
+        git_state=$($hook_func "$git_dir")
+        if [[ -n "$git_state" ]] ; then
+            echo "$git_state"
+            break
+        fi
+    done
+}
+hook_declare git_state
+
+git_state_default() {
+    local git_dir ; git_dir=${1:-$(git_dir)}
     if [[ -f "$git_dir/$GIT_REBASE_MERGE_INTERACTIVE_FILE" ]] ; then
         echo "rebase_interactive"
     elif [[ -d "$git_dir/$GIT_REBASE_MERGE_DIR" ]] ; then
@@ -261,8 +294,16 @@ git_state() {
         fi
     elif [[ -f "$git_dir/$GIT_BISECT_LOG_FILE" ]] ; then
         echo "bisect"
+    else
+        local sequencer_last_command ; sequencer_last_command=$(_git_sequencer_get_last_command)
+        if [[ "$sequencer_last_command" = "pick" ]] ; then
+            echo "cherrypick_sequence"
+        elif [[ "$sequencer_last_command" = "revert" ]] ; then
+            echo "revert_sequence"
+        fi
     fi
 }
+hook_add git_state git_state_default
 
 # TODO this is not inclusive enough -- See: git check-ref-format
 is_git_branch_name() {

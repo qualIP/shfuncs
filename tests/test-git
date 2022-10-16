@@ -94,6 +94,22 @@ test_assert_equal "$(git_state)" "bisect"
 git bisect reset
 test_assert_equal "$(git_state)" ""
 
+test_case git_state-hook
+git bisect start
+test_assert_equal "$(git_state)" "bisect"
+echoA() { echo A ; }
+echoB() { echo B ; }
+hook_add git_state echoA
+hook_add git_state echoB
+test_assert_equal "$(git_state)" "bisect"
+git bisect reset
+test_assert_equal "$(git_state)" "A"
+echoA() { true ; }
+test_assert_equal "$(git_state)" "B"
+echoB() { true ; }
+test_assert_equal "$(git_state)" ""
+# echoA and echoB are harmless; No need to reset the hooks.
+
 popd > /dev/null
 
 rm -Rf "$TEST_TMP_DIR"
