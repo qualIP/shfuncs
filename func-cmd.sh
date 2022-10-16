@@ -77,9 +77,24 @@ run_cmd_redirected_nohup() {
 ## run_cmd_redirected_pty file cmd ...
 #
 # Executes the command in a pseudoterminal.
-# stdout and stderr are both redirected to file.
+# stdout and stderr are both redirected to file (use clean_redirected_cmd_output).
 run_cmd_redirected_pty() {
-    run_cmd_piped_pty "$@" > /dev/null
+    local file="$1" ; shift
+    _run_cmd_piped_pty_internal REDIR "$file" "$@"
+}
+
+## clean_redirected_cmd_output [file]
+#
+# Cleans `script` artifacts from piped or file input.
+clean_redirected_cmd_output() {
+    if (( $# > 1 )) ; then
+        print_err "clean_redirected_cmd_output: Invalid syntax"
+        return 1
+    fi
+    sed -e '
+        1 { /^Script started/ d }
+        $ { /^Script done/ d }
+    ' "$@"
 }
 
 ## run_cmd_piped file cmd ...
@@ -110,8 +125,20 @@ _run_script_version=
 ## run_cmd_piped_pty file cmd ...
 #
 # Executes the command in a pseudoterminal.
-# stdout and stderr are both copied to file and output on stdout.
+# stdout and stderr are both copied to file (use clean_redirected_cmd_output)
+# and output on stdout (clean).
 run_cmd_piped_pty() {
+    _run_cmd_piped_pty_internal CLEAN "$@"
+}
+
+## _run_cmd_piped_pty_internal flags file cmd ...
+#
+# Executes the command in a pseudoterminal.
+# stdout and stderr are both copied to file.
+# If flags is "CLEAN", clean output is sent to stdout.
+# If flags is "REDIR", output is simply redirected.
+_run_cmd_piped_pty_internal() {
+    local flags="$1" ; shift
     local file="$1" ; shift
     local cmd ; cmd=$(quote_args "$@")
     local rows=
@@ -132,12 +159,36 @@ run_cmd_piped_pty() {
         fi
     fi
     if [[ "$_run_script_version" = "util-linux" ]] ; then
-        if script --flush --quiet --command "$colcmd$cmd" --return "$file"
-        then local rc=0 ; else local rc=$? ; fi
+        case "$flags" in
+            CLEAN)
+                if script --flush --quiet --command "$colcmd$cmd" --return "$file" | clean_redirected_cmd_output
+                then local rc=0 ; else local rc=$? ; fi
+                ;;
+            REDIR)
+                if script --flush --quiet --command "$colcmd$cmd" --return "$file" > /dev/null
+                then local rc=0 ; else local rc=$? ; fi
+                ;;
+            *)
+                if script --flush --quiet --command "$colcmd$cmd" --return "$file"
+                then local rc=0 ; else local rc=$? ; fi
+                ;;
+        esac
     else
         # TODO colcmd
-        if script -F -q "$file" "$@"
-        then local rc=0 ; else local rc=$? ; fi
+        case "$flags" in
+            CLEAN)
+                if script -F -q "$file" "$@" | clean_redirected_cmd_output
+                then local rc=0 ; else local rc=$? ; fi
+                ;;
+            REDIR)
+                if script -F -q "$file" "$@" > /dev/null
+                then local rc=0 ; else local rc=$? ; fi
+                ;;
+            *)
+                if script -F -q "$file" "$@"
+                then local rc=0 ; else local rc=$? ; fi
+                ;;
+        esac
     fi
     if [[ -n "$cols" ]] ; then
         stty rows "$rows" cols "$cols"
@@ -315,7 +366,7 @@ log_cmd_live_nohup_quiet() {
 #
 # Logs and executes the command under a pseudopty.
 # No continuation dots.
-# Output is piped to stdout and OUT_TMP.
+# Output is piped to stdout (clean) and OUT_TMP (use clean_redirected_cmd_output).
 # Status is printed on error only.
 log_cmd_live_pty() {
     local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}

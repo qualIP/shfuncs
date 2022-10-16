@@ -48,12 +48,6 @@ echo OLD > "$OUT_TMP"
 test_assert_equal "$(run_cmd_redirected_nohup "$OUT_TMP" echo "abc")" ""
 test_assert_equal "$(<"$OUT_TMP")" "abc"
 
-test_case run_cmd_redirected_pty
-echo OLD > "$OUT_TMP"
-test_assert_equal "$(run_cmd_redirected_pty "$OUT_TMP" echo "abc")" ""
-run_cmd_redirected_pty "$OUT_TMP" echo "abc"
-test_assert_equal "$(grep abc "$OUT_TMP")" "abc"$'\r'
-
 test_case run_cmd_piped
 echo OLD > "$OUT_TMP"
 test_assert_equal "$(run_cmd_piped "$OUT_TMP" echo "abc")" "abc"
@@ -68,7 +62,16 @@ test_case run_cmd_piped_pty
 echo OLD > "$OUT_TMP"
 test_assert_equal "$(run_cmd_piped_pty "$OUT_TMP" echo "abc")" "abc"$'\r'
 run_cmd_piped_pty "$OUT_TMP" echo "abc"
-test_assert_equal "$(grep abc "$OUT_TMP")" "abc"$'\r'
+test_assert_not_equal "$(cat "$OUT_TMP")" "abc"$'\r'
+test_assert_equal "$(clean_redirected_cmd_output "$OUT_TMP")" "abc"$'\r'
+test_assert_equal "$(clean_redirected_cmd_output < "$OUT_TMP")" "abc"$'\r'
+
+test_case run_cmd_redirected_pty
+echo OLD > "$OUT_TMP"
+test_assert_equal "$(run_cmd_redirected_pty "$OUT_TMP" echo "abc")" ""
+run_cmd_redirected_pty "$OUT_TMP" echo "abc"
+test_assert_equal "$(clean_redirected_cmd_output "$OUT_TMP")" "abc"$'\r'
+test_assert_equal "$(clean_redirected_cmd_output < "$OUT_TMP")" "abc"$'\r'
 
 tty_colors_off
 
@@ -118,12 +121,12 @@ test_assert_equal "$(<"$OUT_TMP")" "abc"
 test_case log_cmd_live_pty
 echo OLD > "$OUT_TMP"
 test_assert_equal "$(log_cmd_live_pty echo "abc")" $'    $ echo abc\n    abc\r'
-test_assert_equal "$(grep abc "$OUT_TMP")" "abc"$'\r'
+test_assert_equal "$(clean_redirected_cmd_output "$OUT_TMP")" "abc"$'\r'
 
 test_case log_cmd_live_pty_quiet
 echo OLD > "$OUT_TMP"
 test_assert_equal "$(log_cmd_live_pty_quiet echo "abc")" ""
-test_assert_equal "$(grep abc "$OUT_TMP")" "abc"$'\r'
+test_assert_equal "$(clean_redirected_cmd_output "$OUT_TMP")" "abc"$'\r'
 
 test_case log_cmd_live_maybe_pty-1
 echo OLD > "$OUT_TMP"
@@ -138,12 +141,12 @@ test_assert_equal "$(<"$OUT_TMP")" "abc"
 test_case log_cmd_live_maybe_pty-2
 echo OLD > "$OUT_TMP"
 test_assert_equal "$(tty_colors_mode=off log_cmd_live_pty echo "abc")" $'    $ echo abc\n    abc\r'
-test_assert_equal "$(grep abc "$OUT_TMP")" "abc"$'\r'
+test_assert_equal "$(clean_redirected_cmd_output "$OUT_TMP")" "abc"$'\r'
 
 test_case log_cmd_live_maybe_pty_quiet-2
 echo OLD > "$OUT_TMP"
 test_assert_equal "$(tty_colors_mode=off log_cmd_live_pty_quiet echo "abc")" ""
-test_assert_equal "$(grep abc "$OUT_TMP")" "abc"$'\r'
+test_assert_equal "$(clean_redirected_cmd_output "$OUT_TMP")" "abc"$'\r'
 
 test_case log_cmd_nostatus
 echo OLD > "$OUT_TMP"
