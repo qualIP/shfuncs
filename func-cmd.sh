@@ -447,7 +447,7 @@ log_cmd_live_maybe_pty_quiet() {
 #
 # Logs and executes the command.
 # No continuation dots.
-# Output is send to stdout.
+# Output is sent to stdout.
 log_cmd_nostatus() {
     local cmd ; cmd=$(quote_args "$@")
     print_need_nl
@@ -461,7 +461,7 @@ log_cmd_nostatus() {
 ## log_cmd_nostatus_quiet [cmd ...]
 #
 # Executes the command.
-# Output is send to stdout.
+# Output is sent to stdout.
 # On error: Status is printed on same line as command.
 log_cmd_nostatus_quiet() {
     local cmd ; cmd=$(quote_args "$@")
@@ -476,7 +476,7 @@ log_cmd_nostatus_quiet() {
 #
 # Logs and executes the command with full interactive support.
 # No continuation dots.
-# Output is send to stdout.
+# Output is sent to stdout.
 # Interactive mode is uncaptured and unindented.
 log_cmd_nostatus_interactive() {
     local cmd ; cmd=$(quote_args "$@")
@@ -502,7 +502,7 @@ log_cmd_nostatus_interactive_quiet() {
 #
 # Logs and executes the command with full interactive support.
 # No continuation dots.
-# Output is send to stdout.
+# Output is sent to stdout.
 # Status is printed on error only.
 log_cmd_interactive() {
     if log_cmd_nostatus_interactive "$@"
@@ -529,7 +529,7 @@ log_cmd_interactive_quiet() {
 # Logs and executes the command in the current shell (appropriate for shell
 # internals).
 # No continuation dots.
-# Output is send to stdout.
+# Output is sent to stdout.
 # Shell mode is uncaptured and unindented.
 log_cmd_nostatus_shell() {
     local cmd ; cmd=$(quote_args "$@")
