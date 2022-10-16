@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# Copyright © 2021 qualIP Software
+#
+# This file is part of shfuncs:
+#
+#     https://github.com/qualIP/shfuncs
+#
+# shfuncs is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3.0 of the License, or (at your option)
+# any later version.
+#
+# shfuncs is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with shfuncs; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+
+set -euo pipefail
+
+# shellcheck disable=all
+SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
+. "$SHFUNCS_DIR/func-test.sh"
+. "$SHFUNCS_DIR/func-logic.sh"
+
+test_case bool-true
+test_assert_equal "$(bool true)" true
+test_assert_equal "$(bool y)" true
+test_assert_equal "$(bool Y)" true
+test_assert_equal "$(bool yes)" true
+test_assert_equal "$(bool Yes)" true
+test_assert_equal "$(bool YES)" true
+test_assert_equal "$(bool on)" true
+test_assert_equal "$(bool On)" true
+
+test_case bool-false
+test_assert_equal "$(bool false)" false
+test_assert_equal "$(bool "")" false
+test_assert_equal "$(bool n)" false
+test_assert_equal "$(bool N)" false
+test_assert_equal "$(bool no)" false
+test_assert_equal "$(bool No)" false
+test_assert_equal "$(bool NO)" false
+test_assert_equal "$(bool off)" false
+test_assert_equal "$(bool Off)" false
+
+test_case bool-custom
+rettrue() { return 0 ; }
+test_assert_equal "$(bool rettrue)" true
+retfalse() { return 1 ; }
+test_assert_equal "$(bool retfalse1)" false
+
+test_case bool_not
+test_assert_equal "$(bool_not y)" false
+test_assert_equal "$(bool_not n)" true
+
+test_case bool_and
+test_assert_equal "$(bool_and)" false
+test_assert_equal "$(bool_and n)" n
+test_assert_equal "$(bool_and n n)" n
+test_assert_equal "$(bool_and y)" y
+test_assert_equal "$(bool_and y y)" y
+test_assert_equal "$(bool_and y n)" n
+test_assert_equal "$(bool_and y n y)" n
+test_assert_equal "$(bool_and y y y)" y
+test_assert_equal "$(bool_and y y n)" n
+
+test_case bool_or
+test_assert_equal "$(bool_or)" false
+test_assert_equal "$(bool_or n)" n
+test_assert_equal "$(bool_or n n)" n
+test_assert_equal "$(bool_or y)" y
+test_assert_equal "$(bool_or y y)" y
+test_assert_equal "$(bool_or y n)" y
+test_assert_equal "$(bool_or y n y)" y
+test_assert_equal "$(bool_or y y y)" y
+test_assert_equal "$(bool_or y y n)" y
+
+test_case bool_xor
+test_assert_rc 1 bool_xor
+test_assert_rc 1 bool_xor n
+test_assert_rc 1 bool_xor y
+test_assert_equal "$(bool_xor n n)" false
+test_assert_equal "$(bool_xor y n)" true
+test_assert_rc 1 bool_xor n n y
+test_assert_rc 1 bool_xor y n n
