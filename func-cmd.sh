@@ -408,8 +408,27 @@ log_cmd_live_pty_quiet() {
     return $rc
 }
 
+log_cmd_use_pty() {
+    case "${tty_colors_mode:-}" in
+        on)
+            # Script was called from a tty
+            return 0
+            ;;
+        off)
+            # Script was not called from a tty
+            return 1
+            ;;
+    esac
+    # Script did not using func-tty-colors.sh;
+    # Rely on current use of a tty for stdout.
+    if tty <&1 >/dev/null 2>&1 ; then
+        return 0
+    fi
+    return 1
+}
+
 log_cmd_live_maybe_pty() {
-    if [[ "${tty_colors_mode:-off}" = "on" ]] ; then
+    if log_cmd_use_pty ; then
         log_cmd_live_pty "$@"
     else
         log_cmd_live "$@"
@@ -417,7 +436,7 @@ log_cmd_live_maybe_pty() {
 }
 
 log_cmd_live_maybe_pty_quiet() {
-    if [[ "${tty_colors_mode:-off}" = "on" ]] ; then
+    if log_cmd_use_pty ; then
         log_cmd_live_pty_quiet "$@"
     else
         log_cmd_live_quiet "$@"

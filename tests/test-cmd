@@ -128,6 +128,12 @@ echo OLD > "$OUT_TMP"
 test_assert_equal "$(log_cmd_live_pty_quiet echo "abc")" ""
 test_assert_equal "$(clean_redirected_cmd_output "$OUT_TMP")" "abc"$'\r'
 
+test_case log_cmd_use_pty
+tty_colors_mode=off test_assert_rc 1 log_cmd_use_pty
+tty_colors_mode=on test_assert_rc 0 log_cmd_use_pty
+tty_colors_mode=other test_assert_rc 1 log_cmd_use_pty | cat
+test_assert_rc 1 log_cmd_use_pty | cat
+
 test_case log_cmd_live_maybe_pty-1
 echo OLD > "$OUT_TMP"
 test_assert_equal "$(tty_colors_mode=off log_cmd_live echo "abc")" $'    $ echo abc\n    abc'
