@@ -294,6 +294,9 @@ print_set_var_sh_export() {
     _print export "$1"="$(quote_args "$2")"
 }
 
+print_source() {
+    print_source_$_print_shell_type "$@"
+}
 print_source_csh() {
     _print source "$(quote_args "$1")"
 }
