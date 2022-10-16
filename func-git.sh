@@ -393,6 +393,32 @@ git_upstream_branch() {
     fi
 }
 
+git_branch_exists() {
+    GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git show-ref --verify --quiet "refs/heads/$1"
+}
+
+git_tag_exists() {
+    GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git show-ref --verify --quiet "refs/tags/$1"
+}
+
+git_remote_branch_exists() {
+    GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git show-ref --verify --quiet "refs/remotes/$1"
+}
+
+git_ref_type() {
+    if GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git show-ref --verify --quiet "refs/heads/$1" > /dev/null ; then
+        echo "branch"
+    elif GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git show-ref --verify --quiet "refs/tags/$1" > /dev/null ; then
+        echo "tag"
+    elif GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git show-ref --verify --quiet "refs/remotes/$1" > /dev/null ; then
+        echo "remote"
+    elif GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git rev-parse --verify --quiet "$1^{commit}" > /dev/null ; then
+        echo "hash"
+    else
+        return 1
+    fi
+}
+
 eval "$_qip_func_git_saved_state" ; unset _qip_func_git_saved_state
 
 # vim: ft=bash

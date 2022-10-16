@@ -191,6 +191,31 @@ if false ; then
     test_assert_equal "$(git_upstream_branch)" "remote1/otherA"
 fi
 
+test_case git_branch_exists
+test_assert_rc 0 git_branch_exists A
+test_assert_rc 1 git_branch_exists notabranch
+test_assert_rc 1 git_branch_exists HEAD
+
+test_case git_tag_exists
+test_assert_rc 1 git_tag_exists T
+git tag T A
+test_assert_rc 0 git_tag_exists T
+test_assert_rc 1 git_tag_exists notatag
+test_assert_rc 1 git_tag_exists HEAD
+test_assert_rc 1 git_tag_exists A
+
+# TODO git_remote_branch_exists
+
+test_case git_ref_type
+git remote add remote2 git@github.com:dummy.git
+test_assert_equal "$(git_ref_type A)" "branch"
+test_assert_equal "$(git_ref_type T)" "tag"
+# TODO test_assert_equal "$(git_ref_type remote2/main)" "remote"
+test_assert_equal "$(git_ref_type "$(git rev-parse HEAD)")" "hash"
+test_assert_rc 1 git_ref_type notabranch
+test_assert_rc 1 git_ref_type deaddeadbeef
+test_assert_rc 1 git_ref_type remote2/main
+
 popd > /dev/null
 
 rm -Rf "$TEST_TMP_DIR"
