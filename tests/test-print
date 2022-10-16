@@ -187,10 +187,34 @@ test_case print_value-5
 test_assert_equal "$(print_value name)" "name:"
 
 test_case print_set_var_csh
+set_print_shell_type csh
 test_assert_equal "$(print_set_var_csh name " a b c")" "set name=' a b c'"
+test_assert_equal "$(print_set_var     name " a b c")" "set name=' a b c'"
 
 test_case print_set_var_sh
+set_print_shell_type sh
 test_assert_equal "$(print_set_var_sh name " a b c")" "name=' a b c'"
+test_assert_equal "$(print_set_var    name " a b c")" "name=' a b c'"
+
+test_case print_set_var_csh_local
+set_print_shell_type csh
+test_assert_equal "$(print_set_var_csh_local name " a b c")" "set name=' a b c'"
+test_assert_equal "$(print_set_var_local     name " a b c")" "set name=' a b c'"
+
+test_case print_set_var_sh_local
+set_print_shell_type sh
+test_assert_equal "$(print_set_var_sh_local name " a b c")" "local name=' a b c'"
+test_assert_equal "$(print_set_var_local    name " a b c")" "local name=' a b c'"
+
+test_case print_set_var_csh_export
+set_print_shell_type csh
+test_assert_equal "$(print_set_var_csh_export name " a b c")" "setenv name ' a b c'"
+test_assert_equal "$(print_set_var_export     name " a b c")" "setenv name ' a b c'"
+
+test_case print_set_var_sh_export
+set_print_shell_type sh
+test_assert_equal "$(print_set_var_sh_export name " a b c")" "export name=' a b c'"
+test_assert_equal "$(print_set_var_export    name " a b c")" "export name=' a b c'"
 
 test_case print_source_csh
 test_assert_equal "$(print_source_csh " file name")" "source ' file name'"
@@ -198,7 +222,8 @@ test_assert_equal "$(print_source_csh " file name")" "source ' file name'"
 test_case print_source_sh
 test_assert_equal "$(print_source_sh " file name")" ". ' file name'"
 
-# TODO test_case set_print_shell_type
+set_print_shell_type "$SHELL"
+
 # TODO test_case set_debug_mode
 
 test_case print_h1
