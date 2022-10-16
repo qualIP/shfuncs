@@ -110,6 +110,32 @@ echoB() { true ; }
 test_assert_equal "$(git_state)" ""
 # echoA and echoB are harmless; No need to reset the hooks.
 
+test_case is_git_branch_name/assert_is_git_branch_name
+test_assert_rc 0 is_git_branch_name main
+test_assert_rc 0 assert_is_git_branch_name main
+test_assert_rc 0 is_git_branch_name origin/main
+test_assert_rc 0 assert_is_git_branch_name origin/main
+test_assert_rc 0 is_git_branch_name main-old
+test_assert_rc 0 assert_is_git_branch_name main-old
+test_assert_rc 0 is_git_branch_name m.ain
+test_assert_rc 0 assert_is_git_branch_name m.ain
+test_assert_rc 0 is_git_branch_name m.ai_9n-old
+test_assert_rc 0 assert_is_git_branch_name m.ai_9n-old
+test_assert_rc 1 is_git_branch_name origin//main
+test_assert_rc 1 assert_is_git_branch_name origin//main
+test_assert_rc 1 is_git_branch_name origin//main
+test_assert_rc 1 assert_is_git_branch_name origin//main
+test_assert_rc 1 is_git_branch_name /main
+test_assert_rc 1 assert_is_git_branch_name /main
+test_assert_rc 1 is_git_branch_name -main
+test_assert_rc 1 assert_is_git_branch_name -main
+test_assert_rc 1 is_git_branch_name m%ain
+test_assert_rc 1 assert_is_git_branch_name m%ain
+test_assert_rc 1 is_git_branch_name m..ain
+test_assert_rc 1 assert_is_git_branch_name m..ain
+test_assert_rc 1 is_git_branch_name "m .ain"
+test_assert_rc 1 assert_is_git_branch_name "m .ain"
+
 popd > /dev/null
 
 rm -Rf "$TEST_TMP_DIR"

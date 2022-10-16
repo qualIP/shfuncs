@@ -310,10 +310,20 @@ is_git_branch_name() {
     case "$1" in
         *..*|*.) return 1 ;;
         *//*|/*|*/) return 1 ;;
+        /*) return 1 ;;
         -*) return 1 ;;
         +([A-Za-z0-9_/.+-])) return 0 ;;
         *) return 1 ;;
     esac
+}
+
+assert_is_git_branch_name() {
+    if is_git_branch_name "$1" ; then
+        return 0
+    else
+        print_err "'$1' is not a valid git branch name."
+        return 1
+    fi
 }
 
 git_branch_exists() {
