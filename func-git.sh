@@ -84,7 +84,13 @@ test_git_changeset() {
         fi
         print_status "Changeset empty" PASS
     else
-        log_cmd_live_pty git status
+        if tty <&1 >/dev/null 2>&1 ; then
+            # This is live to user, might as well let it update the index.
+            log_cmd_live_pty git status
+        else
+            # This could be used by a shell script, finish fast.
+            GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} log_cmd_live git status
+        fi
         # On branch master
         # No commits yet
         if ${GREP:-grep} -q "^nothing to commit, \(worktree\|working tree\) clean" "$OUT_TMP" ; then
@@ -104,8 +110,7 @@ test_git_changeset() {
             return 1
         fi
     fi
-    # TODO
-    # log_cmd_live git status --porcelain
+    # GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} log_cmd_live git status --porcelain
     # if ! $OPT_FORCE && test -s "$OUT_TMP" ; then
     #     print_err "Your worktree is dirty. Please commit or stash all changes and run $prog again."
     #     exit 1
@@ -117,25 +122,25 @@ test_git_changeset() {
 # Returns the relative location of the .git directory.
 # Defaults to GIT_DIR environment variable.
 git_dir() {
-    git rev-parse --git-dir
+    GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git rev-parse --git-dir
 }
 
 ## git_path path
 #
 # Resolves "$GIT_DIR/<path>".
 git_path() {
-    git rev-parse --git-path "$1"
+    GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git rev-parse --git-path "$1"
 }
 
 ## git_toplevel
 git_toplevel() {
-    git rev-parse --show-toplevel
+    GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git rev-parse --show-toplevel
 }
 
 ## git_repo [remote]
 git_repo() {
     local git_repo=
-    git_repo=$(git remote get-url "${1:-origin}")
+    git_repo=$(GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git remote get-url "${1:-origin}")
     [[ -n "$git_repo" ]] && git_repo=$(basename "$git_repo" .git)
     echo "$git_repo"
 }
