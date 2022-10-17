@@ -136,6 +136,61 @@ test_assert_rc 1 assert_is_git_branch_name m..ain
 test_assert_rc 1 is_git_branch_name "m .ain"
 test_assert_rc 1 assert_is_git_branch_name "m .ain"
 
+test_case git_branch/git_effective_branch
+test_assert_equal "$(git_branch)" "main"
+test_assert_equal "$(git_effective_branch)" "main"
+test_step checkout-A
+git checkout -b A
+test_assert_equal "$(git_branch)" "A"
+test_assert_equal "$(git_effective_branch)" "A"
+echo 3 > a
+git add a
+test_assert_equal "$(git_branch)" "A"
+test_assert_equal "$(git_effective_branch)" "A"
+git commit -m 3 --no-gpg-sign
+test_step bisect
+git bisect start
+test_assert_equal "$(git_branch)" "A"
+test_assert_equal "$(git_effective_branch)" "A"
+git checkout HEAD~1
+test_assert_equal "$(git_branch)" ""
+test_assert_equal "$(git_effective_branch)" "A"
+git bisect reset
+test_assert_equal "$(git_branch)" "A"
+test_assert_equal "$(git_effective_branch)" "A"
+test_step checkout-B
+git checkout -b B main
+test_assert_equal "$(git_branch)" "B"
+test_assert_equal "$(git_effective_branch)" "B"
+echo 4 > a
+git add a
+git commit -m 4 --no-gpg-sign
+test_step rebase-A
+test_assert_rc 1 git rebase A
+test_assert_equal "$(git_branch)" ""
+test_assert_equal "$(git_effective_branch)" "B"
+git add a
+git commit -m M --no-gpg-sign
+test_assert_equal "$(git_branch)" ""
+test_assert_equal "$(git_effective_branch)" "B"
+git rebase --continue
+test_assert_equal "$(git_branch)" "B"
+test_assert_equal "$(git_effective_branch)" "B"
+git checkout main
+
+test_case git_upstream_branch
+test_assert_equal "$(git_upstream_branch)" ""
+if false ; then
+    # TODO fatal: ambiguous argument '@{u}': unknown revision or path not in the working tree.
+    git remote add remote1 git@github.com:dummy.git
+    git checkout A
+    test_assert_equal "$(git_upstream_branch)" ""
+    # git branch --set-upstream-to=remote1 otherA
+    git config branch.A.remote remote1
+    git config branch.A.merge refs/heads/otherA
+    test_assert_equal "$(git_upstream_branch)" "remote1/otherA"
+fi
+
 popd > /dev/null
 
 rm -Rf "$TEST_TMP_DIR"

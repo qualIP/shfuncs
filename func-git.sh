@@ -338,6 +338,61 @@ git_remote_branch_exists() {
     [[ -n "$sha" ]]
 }
 
+git_branch() {
+    # Command                           | branch checked out   | detached   | outside git
+    # --------------------------------------------------------------------------------------------
+    # $ git symbolic-ref --quiet HEAD   | refs/heads/my_branch | (return 1) | (error + return 128)
+    # $ git rev-parse --abbrev-ref HEAD | my_branch            | HEAD       | (error + return 128)
+    # $ git rev-parse --short HEAD      | SHA                  | SHA        | (error + return 128)
+    local ref=
+    if ! ref=$(GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git symbolic-ref --quiet HEAD) ; then
+        # Not on a branch
+        return 0
+    fi
+    echo "${ref#refs/heads/}"
+}
+
+git_effective_branch() {
+    local git_branch ; git_branch=$(git_branch)
+    if [[ -n "$git_branch" ]] ; then
+        echo "$git_branch"
+        return
+    fi
+
+    local bisect_start_file ; bisect_start_file=$(git_path BISECT_START)
+    if [[ -r "$bisect_start_file" ]] ; then
+        git_branch=$(<"$bisect_start_file")
+        if [[ -n "$git_branch" ]] ; then
+            echo "$git_branch"
+            return
+        fi
+    fi
+
+    local rebase_merge_head_file ; rebase_merge_head_file=$(git_path $GIT_REBASE_MERGE_DIR/head-name)
+    if [[ -r "$rebase_merge_head_file" ]] ; then
+        local rebase_merge_head ; rebase_merge_head=$(<"$rebase_merge_head_file")
+        if [[ "$rebase_merge_head" =~ ^refs/heads/.+ ]] ; then
+            git_branch="${rebase_merge_head:11}"
+            echo "$git_branch"
+            return
+        fi
+    fi
+    # Not on a branch
+}
+
+git_upstream_branch() {
+    if true ; then
+        # Will error:
+        git rev-parse --abbrev-ref --symbolic-full-name '@{u}'
+    else
+        local upstream_branch ; upstream_branch=$(git for-each-ref --format='%(upstream:short)' "$(git symbolic-ref -q HEAD)")
+        if [[ -n "$upstream_branch" ]] ; then
+            echo "$upstream_branch"
+            return
+        fi
+    fi
+}
+
 eval "$_qip_func_git_saved_state" ; unset _qip_func_git_saved_state
 
 # vim: ft=bash
