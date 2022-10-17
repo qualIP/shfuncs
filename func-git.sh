@@ -224,7 +224,9 @@ git_toplevel() {
 git_repo() {
     local git_repo=
     git_repo=$(GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git remote get-url "${1:-origin}")
-    [[ -n "$git_repo" ]] && git_repo=$(basename "$git_repo" .git)
+    [[ -n "$git_repo" ]] || return
+    git_repo=$(basename "$git_repo" .git)
+    [[ -n "$git_repo" ]] || return
     echo "$git_repo"
 }
 
