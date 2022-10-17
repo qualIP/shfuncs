@@ -68,21 +68,23 @@ GIT_STASH_FILE="stash"
 GIT_REFS_STASH_FILE="${GIT_REFS_DIR}$GIT_STASH_FILE"
 }
 
-## test_git_changeset [untracked_ok?]
-test_git_changeset() {
+_git_changeset_state=unknown
+
+## git_eval_changeset_state
+git_eval_changeset_state() {
+    _git_changeset_state=error
     if [[ -z "${OUT_TMP:-}" ]] ; then
-        with_OUT_TMP test_git_changeset "$@"
+        with_OUT_TMP git_eval_changeset_state "$@"
         return $?
     fi
-    local untracked_ok=${1:-true}
     # Use? git diff-index --quiet HEAD --
     if false ; then
         log_cmd_live git diff --name-status
         if [[ -s "$OUT_TMP" ]] ; then
-            print_status "Changeset not empty" FAIL
-            return 1
+            _git_changeset_state=diff
+        else
+            _git_changeset_state=clean
         fi
-        print_status "Changeset empty" PASS
     else
         if tty <&1 >/dev/null 2>&1 ; then
             # This is live to user, might as well let it update the index.
@@ -94,20 +96,25 @@ test_git_changeset() {
         # On branch master
         # No commits yet
         if ${GREP:-grep} -q "^nothing to commit, \(worktree\|working tree\) clean" "$OUT_TMP" ; then
-            print_status "Worktree clean" PASS
+            _git_changeset_state="clean"
         elif ${GREP:-grep} -q "^nothing to commit (create/copy files and use \"git add\" to track)" "$OUT_TMP" ; then
-            # nothing to commit (create/copy files and use "git add" to track)
-            print_status "Worktree clean" PASS
+            # "nothing to commit (create/copy files and use "git add" to track)"
+            # Different version of the above?
+            _git_changeset_state="clean"
         elif ${GREP:-grep} -q "^nothing added to commit but untracked files present" "$OUT_TMP" ; then
-            if $untracked_ok ; then
-                print_status "Worktree clean" PASS "(untracked files present)"
-            else
-                print_status "Worktree clean" FAIL "(untracked files present)"
-                return 1
-            fi
+            _git_changeset_state="clean"
+            _git_changeset_state+="-untracked"
         else
-            print_status "Worktree not clean" FAIL
-            return 1
+            _git_changeset_state="dirty"
+        fi
+        if [[ "$_git_changeset_state" =~ ^clean ]] ; then
+            if ${GREP:-grep} -q "^On branch " "$OUT_TMP" ; then
+                # On branch xyz
+                if ! ${GREP:-grep} -q "^Your branch is up to date with " "$OUT_TMP" ; then
+                    # Your branch is up to date with 'origin/xyz'.
+                    _git_changeset_state+="-notpushed"
+                fi
+            fi
         fi
     fi
     # GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} log_cmd_live git status --porcelain
@@ -115,6 +122,82 @@ test_git_changeset() {
     #     print_err "Your worktree is dirty. Please commit or stash all changes and run $prog again."
     #     exit 1
     # fi
+}
+
+git_changeset_state() {
+    _git_changeset_state=error
+    git_eval_changeset_state "$@" > /dev/null || return $?
+    echo "$_git_changeset_state"
+}
+
+git_changeset_state_cached() {
+    echo "$_git_changeset_state"
+}
+
+## test_git_changeset [options...]
+test_git_changeset() {
+    local untracked_ok=true
+    local branch_not_pushed_ok=true
+    local git_changeset_state
+    while (( $# )) ; do
+        case "$1" in
+            --changeset-state) git_changeset_state="$2" ; shift 2 ;;
+            --untracked-ok)    untracked_ok=true  ; shift ;;
+            --untracked-fail)  untracked_ok=false ; shift ;;
+            --branch-not-pushed-ok)   branch_not_pushed_ok=true  ; shift ;;
+            --branch-not-pushed-fail) branch_not_pushed_ok=false ; shift ;;
+            *) print_err "Invalid argument: $1" ; return 1 ;;
+        esac
+    done
+    if [[ -z "$git_changeset_state" ]] ; then
+        git_eval_changeset_state || return $?
+        git_changeset_state=$(git_changeset_state_cached)
+    fi
+    case "$git_changeset_state" in
+        diff)
+            print_status "Worktree clean" FAIL "(uncommitted changes present)"
+            return 1
+            ;;
+        clean)
+            print_status "Worktree clean" PASS
+            return 0
+            ;;
+        clean-notpushed)
+            if $branch_not_pushed_ok ; then
+                print_status "Worktree clean" PASS "(branch not pushed)"
+                return 0
+            else
+                print_status "Worktree clean" FAIL "(branch not pushed)"
+                return 1
+            fi
+            ;;
+        clean-untracked)
+            if $untracked_ok ; then
+                print_status "Worktree clean" PASS "(untracked files present)"
+                return 0
+            else
+                print_status "Worktree clean" FAIL "(untracked files present)"
+                return 1
+            fi
+            ;;
+        clean-untracked-notpushed)
+            if $untracked_ok && $branch_not_pushed_ok ; then
+                print_status "Worktree clean" PASS "(untracked files present; branch not pushed)"
+                return 0
+            else
+                print_status "Worktree clean" FAIL "(untracked files present; branch not pushed)"
+                return 1
+            fi
+            ;;
+        dirty)
+            print_status "Worktree clean" FAIL "(uncommitted changes present)"
+            return 1
+            ;;
+        *)
+            print_status "Worktree clean" FAIL "($git_changeset_state)"
+            return 1
+            ;;
+    esac
 }
 
 ## git_dir
