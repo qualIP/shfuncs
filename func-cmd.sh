@@ -83,6 +83,7 @@ run_cmd_redirected_pty() {
     _run_cmd_piped_pty_internal REDIR "$file" "$@"
 }
 
+# shellcheck disable=SC2120
 ## clean_redirected_cmd_output [file]
 #
 # Cleans `script` artifacts from piped or file input.

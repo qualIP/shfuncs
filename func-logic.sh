@@ -29,7 +29,7 @@ bool() {
         false) echo false ;;
         # Slow
         *)
-            case "$(tr '[[:upper:]]' '[[:lower:]]' <<<"$b")" in
+            case "$(tr '[:upper:]' '[:lower:]' <<<"$b")" in
                 true) echo true ;;
                 y|yes) echo true ;;
                 on) echo true ;;
@@ -51,7 +51,7 @@ bool_not() {
 bool_and() {
     local b=false
     for b in "$@" ; do
-        $(bool "$b") || break
+        "$(bool "$b")" || break
     done
     echo "$b"
 }
@@ -59,7 +59,7 @@ bool_and() {
 bool_or() {
     local b=false
     for b in "$@" ; do
-        $(bool "$b") && break
+        "$(bool "$b")" && break
     done
     echo "$b"
 }

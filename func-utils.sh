@@ -56,7 +56,7 @@ _curl_get_compressed_arg_known=false
 _curl_get_compressed_arg=
 curl_get_compressed_arg() {
     if ! $_curl_get_compressed_arg_known ; then
-        local out=$(${CURL:-curl} --help)
+        local out ; out=$(${CURL:-curl} --help)
         if [[ "$out" =~ --compressed ]] ; then
             _curl_get_compressed_arg=--compressed
         elif [[ "$out" =~ --compress ]] ; then

@@ -265,7 +265,7 @@ print_value() {
 _print_shell_type=
 
 print_set_var() {
-    ${_print_set_var} "$@"
+    "${_print_set_var}" "$@"
 }
 print_set_var_csh() {
     _print set "$1"="$(quote_args "$2")"
@@ -275,7 +275,7 @@ print_set_var_sh() {
 }
 
 print_set_var_local() {
-    ${_print_set_var}_local "$@"
+    "${_print_set_var}_local" "$@"
 }
 print_set_var_csh_local() {
     _print set "$1"="$(quote_args "$2")"
@@ -285,7 +285,7 @@ print_set_var_sh_local() {
 }
 
 print_set_var_export() {
-    ${_print_set_var}_export "$@"
+    "${_print_set_var}"_export "$@"
 }
 print_set_var_csh_export() {
     _print setenv "$1" "$(quote_args "$2")"
@@ -295,7 +295,7 @@ print_set_var_sh_export() {
 }
 
 print_source() {
-    print_source_$_print_shell_type "$@"
+    "print_source_$_print_shell_type" "$@"
 }
 print_source_csh() {
     _print source "$(quote_args "$1")"

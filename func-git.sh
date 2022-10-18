@@ -69,11 +69,11 @@ GIT_STASH_FILE="stash"
 GIT_REFS_STASH_FILE="${GIT_REFS_DIR}$GIT_STASH_FILE"
 }
 
-_git_changeset_state=unknown
+_git_changeset_state="unknown"
 
 ## git_eval_changeset_state
 git_eval_changeset_state() {
-    _git_changeset_state=error
+    _git_changeset_state="error"
     if [[ -z "${OUT_TMP:-}" ]] ; then
         with_OUT_TMP git_eval_changeset_state "$@"
         return $?
@@ -82,9 +82,9 @@ git_eval_changeset_state() {
     if false ; then
         log_cmd_live git diff --name-status
         if [[ -s "$OUT_TMP" ]] ; then
-            _git_changeset_state=diff
+            _git_changeset_state="diff"
         else
-            _git_changeset_state=clean
+            _git_changeset_state="clean"
         fi
     else
         if tty <&1 >/dev/null 2>&1 ; then
@@ -126,7 +126,7 @@ git_eval_changeset_state() {
 }
 
 git_changeset_state() {
-    _git_changeset_state=error
+    _git_changeset_state="error"
     git_eval_changeset_state "$@" > /dev/null || return $?
     echo "$_git_changeset_state"
 }
@@ -237,7 +237,7 @@ _git_sequencer_get_last_command() {
     local command
     local rest
     if [[ -f "$git_dir/$GIT_SEQUENCER_TODO_FILE" ]] ; then
-        if read command rest < "$git_dir/$GIT_SEQUENCER_TODO_FILE"
+        if read -r command rest < "$git_dir/$GIT_SEQUENCER_TODO_FILE"
         then
             case "$command" in
                 p|pick) echo "pick" ; return 0 ;;
@@ -310,7 +310,6 @@ is_git_branch_name() {
     case "$1" in
         *..*|*.) return 1 ;;
         *//*|/*|*/) return 1 ;;
-        /*) return 1 ;;
         -*) return 1 ;;
         +([A-Za-z0-9_/.+-])) return 0 ;;
         *) return 1 ;;

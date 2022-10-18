@@ -28,14 +28,14 @@ SHFUNCS_DIR=${SHFUNCS_DIR:-$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")}
 hook_declare() {
     local hook_name ; hook_name=$1 ; shift 1
     local hook_var="_hook_${hook_name}_"
-    declare -g $hook_var=
+    declare -g "$hook_var"=
 }
 
 hook_add() {
     local hook_name ; hook_name=$1 ; shift 1
     local hook_func ; hook_func=$1 ; shift 1
     local hook_var="_hook_${hook_name}_"
-    lappend $hook_var "$hook_func"
+    lappend "$hook_var" "$hook_func"
 }
 
 hook_get() {
