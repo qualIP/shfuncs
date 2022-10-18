@@ -26,11 +26,21 @@ SHFUNCS_DIR=${SHFUNCS_DIR:-$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")}
 . "$SHFUNCS_DIR/func-print.sh"
 
 _test_case_name=
+_test_step_no=0
+_test_step_name=
 
 ## test_case name
 test_case() {
     _test_case_name=$1 ; shift
+    _test_step_no=0
     print_h2 "TEST: $_test_case_name"
+}
+
+## test_step name
+test_step() {
+    _test_step_name=$1 ; shift
+    _test_step_no=$(( _test_step_no + 1 ))
+    print_h3 "STEP $_test_step_no. $_test_step_name"
 }
 
 ## test_assert_equal value1 value2
