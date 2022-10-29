@@ -123,6 +123,9 @@ test_assert_equal "$(print_q QUESTION? choices def ; echo X)" "QUESTION? (choice
 test_case print_q-6
 test_assert_equal "$(print_q QUESTION? choices "" ; echo X)" "QUESTION? (choices) [] X"
 
+test_case print_q-7
+test_assert_equal "$(print_q QUESTION ; echo X ; print_q QUESTION2 ; echo X)" $'QUESTION: X\nQUESTION2: X'
+
 test_case print_a-1
 test_assert_equal "$(print_a)" ""
 
