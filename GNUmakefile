@@ -1,9 +1,9 @@
 help:
 
-.PHONY: help check test
+.PHONY: help check test clean
 
 help:
-	@echo "Please provide a target: check test" >&2
+	@echo "Please provide a target: check test clean" >&2
 	@exit 1
 
 check:
@@ -17,3 +17,6 @@ test-bash:
 
 test-zsh:
 	zsh ./tests/test-all
+
+clean:
+	rm -Rf test.OUT_TMP*
