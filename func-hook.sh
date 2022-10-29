@@ -28,7 +28,8 @@ SHFUNCS_DIR=${SHFUNCS_DIR:-$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")}
 hook_declare() {
     local hook_name ; hook_name=$1 ; shift 1
     local hook_var="_hook_${hook_name}_"
-    declare -g "$hook_var"=
+    # No -g in bash 3.2: declare -g $hook_var=
+    eval "$hook_var="
 }
 
 hook_add() {
