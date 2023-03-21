@@ -33,9 +33,11 @@ bool() {
                 true) echo true ;;
                 y|yes) echo true ;;
                 on) echo true ;;
+                1) echo true ;;
                 false) echo false ;;
                 n|no) echo false ;;
                 off) echo false ;;
+                0) echo false ;;
                 "") echo false ;;
                 *) "$@" && echo true || echo false ;;
             esac
