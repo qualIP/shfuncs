@@ -65,6 +65,10 @@ decode_html() {
     ' <<< "$*"
 }
 
+decode_xml() {
+    decode_html "$@"
+}
+
 ## encode_pct in [...]
 encode_pct() {
     ${SED:-sed} -e '
