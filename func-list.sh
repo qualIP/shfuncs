@@ -114,7 +114,13 @@ lprepend() {
     eval "$_lprepend_var"=\$\*
 }
 fi
-alias lpush=lprepend
+
+## lpush var args...
+#
+# Synonym for lprepend.
+lpush() {
+    lprepend "$@"
+}
 
 ## lappend var args...
 #

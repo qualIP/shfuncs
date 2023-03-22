@@ -138,6 +138,12 @@ _test_lpreprend_6() {
 _test_lpreprend_6
 test_assert_equal "$VAR" "x y z"
 
+test_case lpush-1
+VAR=
+test_assert_equal "$(lpush VAR a b c)" ""
+lpush VAR a b c
+test_assert_equal "$VAR" "a b c"
+
 test_case lappend-1
 VAR=
 test_assert_equal "$(lappend VAR)" ""
