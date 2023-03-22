@@ -47,7 +47,7 @@ test_step() {
 test_assert_equal() {
     local v1=$1 ; shift
     local v2=$1 ; shift
-    local desc=${1:-} ; shift || true
+    local desc=${1:-} ; (( $# )) && shift
     if ! [[ "$v1" == "$v2" ]] ; then
         print_err "${desc:-test_assert_equal} failed: '$v1' == '$v2'"
         return 1
@@ -58,7 +58,7 @@ test_assert_equal() {
 test_assert_not_equal() {
     local v1=$1 ; shift
     local v2=$1 ; shift
-    local desc=${1:-} ; shift || true
+    local desc=${1:-} ; (( $# )) && shift
     if ! [[ "$v1" != "$v2" ]] ; then
         print_err "${desc:-test_assert_not_equal} failed: '$v1' != '$v2'"
         return 1

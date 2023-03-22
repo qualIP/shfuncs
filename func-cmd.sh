@@ -210,12 +210,12 @@ log_cmd() {
     if run_cmd_redirected "$loc_OUT_TMP" "$@"
     then local rc=0 ; else local rc=$? ; fi
     #print_nl
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         print_cmd_status "$cmd" ERROR "($rc)"
     else
         print_cmd_status "$cmd" OK
     fi
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         if [[ -s "$loc_OUT_TMP" ]] ; then
             { print_err "$(<"$loc_OUT_TMP")" 2>&1 ; } | indent >&2
         fi
@@ -239,7 +239,7 @@ log_cmd_quiet() {
     local cmd ; cmd=$(quote_args "$@")
     if run_cmd_redirected "$loc_OUT_TMP" "$@"
     then local rc=0 ; else local rc=$? ; fi
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         print_need_nl
         print_cmd_status "$cmd" ERROR "($rc)"
         if [[ -s "$loc_OUT_TMP" ]] ; then
@@ -265,7 +265,7 @@ log_cmd_long() {
     if run_cmd_redirected "$loc_OUT_TMP" "$@"
     then local rc=0 ; else local rc=$? ; fi
     #print_nl
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         print_cmd_status "$cmd" ERROR "($rc)"
     else
         if [[ -s "$loc_OUT_TMP" ]] ; then
@@ -278,7 +278,7 @@ log_cmd_long() {
             print_cmd_status "..." OK
         fi
     fi
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         if [[ -s "$loc_OUT_TMP" ]] ; then
             { print_err "$(<"$loc_OUT_TMP")" 2>&1 ; } | indent >&2
         fi
@@ -311,7 +311,7 @@ log_cmd_live() {
     if run_indent run_cmd_piped "$loc_OUT_TMP" "$@"
     then local rc=0 ; else local rc=$? ; fi
     print_nl
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         print_cmd_status "$cmd" ERROR "($rc)"
     else
         : # print_cmd_status "$cmd" OK
@@ -332,7 +332,7 @@ log_cmd_live_nohup() {
     if run_indent run_cmd_piped_nohup "$loc_OUT_TMP" "$@"
     then local rc=0 ; else local rc=$? ; fi
     print_nl
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         print_cmd_status "$cmd" ERROR "($rc)"
     else
         : # print_cmd_status "$cmd" OK
@@ -352,7 +352,7 @@ log_cmd_live_nohup_quiet() {
     local cmd ; cmd=$(quote_args "$@")
     if run_cmd_redirected_nohup "$loc_OUT_TMP" "$@"
     then local rc=0 ; else local rc=$? ; fi
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         print_need_nl
         print_cmd_status "$cmd" ERROR "($rc)"
         if [[ -s "$loc_OUT_TMP" ]] ; then
@@ -377,7 +377,7 @@ log_cmd_live_pty() {
     if run_indent_esc run_cmd_piped_pty "$loc_OUT_TMP" "$@"
     then local rc=0 ; else local rc=$? ; fi
     print_nl
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         print_cmd_status "$cmd" ERROR "($rc)"
     else
         : # print_cmd_status "$cmd" OK
@@ -398,7 +398,7 @@ log_cmd_live_pty_quiet() {
     local cmd ; cmd=$(quote_args "$@")
     if run_cmd_redirected_pty "$loc_OUT_TMP" "$@"
     then local rc=0 ; else local rc=$? ; fi
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         print_need_nl
         print_cmd_status "$cmd" ERROR "($rc)"
         if [[ -s "$loc_OUT_TMP" ]] ; then
@@ -467,7 +467,7 @@ log_cmd_nostatus() {
 log_cmd_nostatus_quiet() {
     local cmd ; cmd=$(quote_args "$@")
     local rc=0 ; "$@" >& /dev/null || rc=$?
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         print_cmd_status "$cmd" ERROR "($rc)"
     fi
     return $rc
@@ -492,7 +492,7 @@ log_cmd_nostatus_interactive() {
 log_cmd_nostatus_interactive_quiet() {
     local cmd ; cmd=$(quote_args "$@")
     local rc=0 ; "$@" >& /dev/null || rc=$?
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         print_need_nl
         print_cmd_status "$cmd" ERROR "($rc)"
     fi
@@ -508,7 +508,7 @@ log_cmd_nostatus_interactive_quiet() {
 log_cmd_interactive() {
     if log_cmd_nostatus_interactive "$@"
     then local rc=0 ; else local rc=$? ; fi
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         local cmd ; cmd=$(quote_args "$@")
         print_need_nl
         print_cmd_status "$cmd" ERROR "($rc)"
@@ -518,7 +518,7 @@ log_cmd_interactive() {
 
 log_cmd_interactive_quiet() {
     local rc=0 ; log_cmd_nostatus_interactive_quiet "$@" || rc=$?
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         print_need_nl
         print_cmd_status "$cmd" ERROR "($rc)"
     fi
@@ -548,7 +548,7 @@ log_cmd_nostatus_shell_quiet() {
     # Using "$cmd" instead of "$@" because eval concatenates spaces
     if eval "$cmd" >& /dev/null
     then local rc=0 ; else local rc=$? ; fi
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         print_need_nl
         print_cmd_status "$cmd" ERROR "($rc)"
     fi
@@ -562,7 +562,7 @@ log_cmd_nostatus_shell_quiet() {
 log_cmd_shell() {
     if log_cmd_nostatus_shell "$@"
     then local rc=0 ; else local rc=$? ; fi
-    if [[ $rc != 0 ]] ; then
+    if (( $rc )) ; then
         local cmd ; cmd=$(quote_args "$@")
         print_cmd_status "$cmd" ERROR "($rc)"
     else

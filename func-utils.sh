@@ -45,7 +45,7 @@ _utils_trap_handler() {
 
 ## utils_set_cleanup_function function
 utils_set_cleanup_function() {
-    _utils_cleanup_function="$1" ; shift || true
+    _utils_cleanup_function="$1" ; (( $# )) && shift
     trap '_utils_trap_handler EXIT' 0
     trap '_utils_trap_handler HUP'  1
     trap '_utils_trap_handler INT'  2
@@ -82,7 +82,7 @@ utils_run_curl() {
         -o "$loc_OUT_TMP" \
         $(${OPT_DEBUG:-false} && echo "-v") \
         "$@")"
-    if [[ "$HTTP_CODE" != "200" ]] ; then
+    if (( "$HTTP_CODE" != "200" )) ; then
         print_err "Error: Request returned code $HTTP_CODE."
         if [[ -f "$loc_OUT_TMP" ]] ; then
             cat "$loc_OUT_TMP" >&2

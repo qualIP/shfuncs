@@ -134,11 +134,11 @@ print_q() {
     local q=$1 ; shift
     [[ "${q: -1}" = "?" ]] || [[ "${q: -1}" = ":" ]] || q="$q:"
     local choices=
-    if (( $# > 0 )) ; then
+    if (( $# )) ; then
         choices=$1 ; shift
         [[ -n "$choices" ]] && choices=" ($choices)"
     fi
-    if (( $# > 0 )) ; then
+    if (( $# )) ; then
         default=$1 ; shift
         choices+=" [$default]"
     fi
@@ -198,7 +198,7 @@ print_status() {
         --nosep) nosep=$1 ; shift 1 ;;
     esac
     local t="$1" ; shift
-    local s="${1:-}" ; shift || true
+    local s="${1:-}" ; (( $# )) && shift
     local c=
     local b=
     case "$s" in
@@ -237,7 +237,7 @@ print_cmd_status() {
         --nosep) nosep=$1 ; shift 1 ;;
     esac
     local t="$1" ; shift
-    local s="${1:-}" ; shift || true
+    local s="${1:-}" ; (( $# )) && shift
     # shellcheck disable=SC2086
     print_status "$n" $nosep "\$ $t" "$s" "$@" | indent
     _last_print_is_nl=false
@@ -393,7 +393,7 @@ print_var_val_pairs() {
     local var val
     while (( $# )) ; do
         var=$1 ; shift
-        val=${1:-} ; shift || true
+        val=${1:-} ; (( $# )) && shift
         print_value -0 "$var" "$val"
     done
 }

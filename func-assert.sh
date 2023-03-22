@@ -177,7 +177,7 @@ assert_file_exists() {
     case "$1" in
         -v) loc_OPT_VERBOSE=true ; shift ;;
     esac
-    if [[ $# != 1 ]] ; then
+    if (( $# != 1 )) ; then
         print_err "Invalid arguments: $(quote_args "$@")"
         return $EINVAL
     fi
@@ -196,7 +196,7 @@ assert_file_not_exists() {
     case "$1" in
         -v) loc_OPT_VERBOSE=true ; shift ;;
     esac
-    if [[ $# != 1 ]] ; then
+    if (( $# != 1 )) ; then
         print_err "Invalid arguments: $(quote_args "$@")"
         return $EINVAL
     fi
@@ -215,7 +215,7 @@ assert_is_file() {
     case "$1" in
         -v) loc_OPT_VERBOSE=true ; shift ;;
     esac
-    if [[ $# != 1 ]] ; then
+    if (( $# != 1 )) ; then
         print_err "Invalid arguments: $(quote_args "$@")"
         return $EINVAL
     fi
@@ -242,7 +242,7 @@ assert_is_directory() {
     case "$1" in
         -v) loc_OPT_VERBOSE=true ; shift ;;
     esac
-    if [[ $# != 1 ]] ; then
+    if (( $# != 1 )) ; then
         print_err "Invalid arguments: $(quote_args "$@")"
         return $EINVAL
     fi

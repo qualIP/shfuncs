@@ -153,7 +153,7 @@ lindex() {
             :
             ;;
     esac
-    if [[ $shift_cnt -ge 0 ]] && [[ $shift_cnt -lt $# ]] ; then
+    if (( $shift_cnt >= 0 )) && (( $shift_cnt < $# )) ; then
         shift $shift_cnt
         echo "$1"
     fi

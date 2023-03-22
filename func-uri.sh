@@ -25,7 +25,7 @@ typeset -f make_url > /dev/null && return
 make_url() {
     local url="$1" ; shift
     local sep="?"
-    while [[ $# -gt 0 ]] ; do
+    while (( $# )) ; do
         url="$url$sep$1=$(encode_pct "$2")"
         shift 2
         sep="&"
