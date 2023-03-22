@@ -23,6 +23,7 @@ typeset -f log_cmd > /dev/null && return
 
 # shellcheck disable=all
 SHFUNCS_DIR=${SHFUNCS_DIR:-$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")}
+. "$SHFUNCS_DIR/func-compat.sh"
 . "$SHFUNCS_DIR/func-print.sh"
 . "$SHFUNCS_DIR/func-args.sh"
 
@@ -33,7 +34,7 @@ SHFUNCS_DIR=${SHFUNCS_DIR:-$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")}
 # stderr is not redirected.
 run_indent() {
     local state ; state=$(set +o) ; [[ -n "${BASH_SOURCE:-}" ]] && shopt -qo errexit && state="$state ; set -e"
-    set -o pipefail
+    has_pipefail && set -o pipefail
     if "$@" | indent
     then local rc=0 ; else local rc=$? ; fi
     eval "$state"
@@ -48,7 +49,7 @@ run_indent() {
 # stderr is not redirected.
 run_indent_esc() {
     local state ; state=$(set +o) ; [[ -n "${BASH_SOURCE:-}" ]] && shopt -qo errexit && state="$state ; set -e"
-    set -o pipefail
+    has_pipefail && set -o pipefail
     if "$@" | indent_esc
     then local rc=0 ; else local rc=$? ; fi
     eval "$state"
@@ -105,7 +106,7 @@ clean_redirected_cmd_output() {
 run_cmd_piped() {
     local file="$1" ; shift
     local state ; state=$(set +o) ; [[ -n "${BASH_SOURCE:-}" ]] && shopt -qo errexit && state="$state ; set -e"
-    set -o pipefail
+    has_pipefail && set -o pipefail
     if { { "$@" ; } 2>&1 ; } | tee "$file"
     then local rc=0 ; else local rc=$? ; fi
     eval "$state"

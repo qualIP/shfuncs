@@ -19,12 +19,14 @@
 # along with shfuncs; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-set -euo pipefail
+set -eu
 
 # shellcheck disable=all
 SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
 . "$SHFUNCS_DIR/func-test.sh"
 . "$SHFUNCS_DIR/func-tty-colors.sh"
+
+has_pipefail && set -o pipefail
 
 test_color_palette() {
     local line v c

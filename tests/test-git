@@ -19,7 +19,7 @@
 # along with shfuncs; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-#set -euo pipefail
+#set -eu
 set -e
 
 # shellcheck disable=all
@@ -27,6 +27,8 @@ SHFUNCS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")/.." && pwd)
 . "$SHFUNCS_DIR/func-test.sh"
 . "$SHFUNCS_DIR/func-git.sh"
 . "$SHFUNCS_DIR/func-cmd.sh"
+
+#has_pipefail && set -o pipefail
 
 TEST_TMP_DIR="$SHFUNCS_DIR/test.TEST_TMP_DIR.$$.tmp"
 rm -Rf "$TEST_TMP_DIR"

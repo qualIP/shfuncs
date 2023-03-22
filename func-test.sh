@@ -23,6 +23,7 @@ typeset -f test_case > /dev/null && return
 
 # shellcheck disable=all
 SHFUNCS_DIR=${SHFUNCS_DIR:-$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")}
+. "$SHFUNCS_DIR/func-compat.sh"
 . "$SHFUNCS_DIR/func-print.sh"
 
 _test_case_name=
