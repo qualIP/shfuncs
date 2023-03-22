@@ -115,9 +115,7 @@ alias lpush=lprepend
 lappend() {
     local _lappend_var="$1" ; shift 1
     # shellcheck disable=SC2086
-    local _lappend_local
-    _lappend_local="$(eval "echo -n \"\$$_lappend_var\"")"
-    set -- $_lappend_local "$@"
+    set -- ${!_lappend_var} "$@"
     local _lappend_val="$*"
     eval "$_lappend_var"=\$_lappend_val
 }
