@@ -112,7 +112,8 @@ git_eval_changeset_state() {
             if ${GREP:-grep} -q "^On branch " "$OUT_TMP" ; then
                 # On branch xyz
                 if ! ${GREP:-grep} -q "^Your branch is up to date with " "$OUT_TMP" ; then
-                    # Your branch is up to date with 'origin/xyz'.
+                    # Your branch is based on 'origin/xyz', but the upstream is gone.
+                    # (not) Your branch is up to date with 'origin/xyz'.
                     _git_changeset_state+="-notpushed"
                 fi
             fi

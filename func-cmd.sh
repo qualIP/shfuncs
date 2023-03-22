@@ -416,7 +416,7 @@ log_cmd_use_pty() {
             return 1
             ;;
     esac
-    # Script did not using func-tty-colors.sh;
+    # Script did not use func-tty-colors.sh;
     # Rely on current use of a tty for stdout.
     if tty <&1 >/dev/null 2>&1 ; then
         return 0
