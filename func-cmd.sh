@@ -268,15 +268,11 @@ log_cmd_long() {
     if (( $rc )) ; then
         print_cmd_status "$cmd" ERROR "($rc)"
     else
-        if [[ -s "$loc_OUT_TMP" ]] ; then
-            if tty <&1 >/dev/null 2>&1 ; then
-                # Go to beginning of the previous line and clear to EOL.
-                echo -n -e "\033[F\033[K"
-            fi
-            print_cmd_status "$cmd" OK
-        else
-            print_cmd_status "..." OK
+        if tty <&1 >/dev/null 2>&1 ; then
+            # Go to beginning of the previous line and clear to EOL.
+            echo -n -e "\033[F\033[K"
         fi
+        print_cmd_status "$cmd" OK
     fi
     if (( $rc )) ; then
         if [[ -s "$loc_OUT_TMP" ]] ; then
