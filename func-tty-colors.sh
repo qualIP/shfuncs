@@ -138,7 +138,7 @@ tty_colors_html() {
 setup_tty_colors() {
     if [[ -n "${REQUEST_URI:-}" ]] || [[ "${tty_colors_mode:-}" = "html" ]] ; then
         tty_colors_html
-    elif tty <&1 >/dev/null 2>&1 ; then
+    elif tty <&2 >/dev/null 2>&1 || tty <&1 >/dev/null 2>&1 ; then
         tty_colors_on
     else
         tty_colors_off
