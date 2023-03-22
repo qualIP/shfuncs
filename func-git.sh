@@ -333,18 +333,6 @@ assert_is_git_branch_name() {
     fi
 }
 
-git_branch_exists() {
-    local v
-    sha=$(git show-ref "refs/heads/$1")
-    [[ -n "$sha" ]]
-}
-
-git_remote_branch_exists() {
-    local v
-    sha=$(git show-ref "refs/remotes/$1")
-    [[ -n "$sha" ]]
-}
-
 git_branch() {
     # Command                           | branch checked out   | detached   | outside git
     # --------------------------------------------------------------------------------------------
