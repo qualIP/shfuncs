@@ -100,29 +100,57 @@ join_list() {
 ## lprepend var args...
 #
 # Modify the specified variable by prepending it with all other arguments
+if [[ -n "${ZSH_VERSION:-}" ]] ; then
+lprepend() {
+    local _lprepend_var="$1" ; shift 1
+    set -- "$@" ${(P)_lprepend_var}
+    eval "$_lprepend_var"=\$\*
+}
+else
 lprepend() {
     local _lprepend_var="$1" ; shift 1
     # shellcheck disable=SC2086
     set -- "$@" ${!_lprepend_var}
-    local _lprepend_val="$*"
-    eval "$_lprepend_var"=\$_lprepend_val
+    eval "$_lprepend_var"=\$\*
 }
+fi
 alias lpush=lprepend
 
 ## lappend var args...
 #
 # Modify the specified variable by appending it with all other arguments
+if [[ -n "${ZSH_VERSION:-}" ]] ; then
+lappend() {
+    local _lappend_var="$1" ; shift 1
+    set -- ${(P)_lappend_var} "$@"
+    eval "$_lappend_var"=\$\*
+}
+else
 lappend() {
     local _lappend_var="$1" ; shift 1
     # shellcheck disable=SC2086
     set -- ${!_lappend_var} "$@"
-    local _lappend_val="$*"
-    eval "$_lappend_var"=\$_lappend_val
+    eval "$_lappend_var"=\$\*
 }
+fi
 
 ## lpop var [outvar=lpop_value]
 #
 # Modify the specified variable by popping the first element
+if [[ -n "${ZSH_VERSION:-}" ]] ; then
+lpop() {
+    local _lpop_var="$1" ; shift
+    if (( $# )) ; then
+        local _lpop_outvar="$1" ; shift
+    else
+        local _lpop_outvar=lpop_value
+    fi
+    set -- ${(P)_lpop_var}
+    (( $# )) || return 1
+    eval "$_lpop_outvar"=\$1 ; shift 1
+    eval "$_lpop_var"=\$\*
+}
+else
 lpop() {
     local _lpop_var="$1" ; shift
     if (( $# )) ; then
@@ -136,6 +164,7 @@ lpop() {
     eval "$_lpop_outvar"=\$1 ; shift 1
     eval "$_lpop_var"=\$\*
 }
+fi
 
 ## lindex idx args...
 #
