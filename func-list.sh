@@ -235,4 +235,15 @@ lsort() {
     echo $v
 }
 
+## lmap func args...
+#
+# Maps a function to each list argument.
+lmap() {
+    local func=$1 ; shift
+    local e
+    for e in "$@" ; do
+        $func "$e"
+    done
+}
+
 # vim: ft=bash

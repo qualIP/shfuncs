@@ -264,3 +264,9 @@ test_assert_equal "$(lsort c b a)" "a b c"
 
 test_case lsort-3
 test_assert_equal "$(lsort c "b a" d)" "b a c d"
+
+test_case lmap-1
+func() { echo "$(( $1 + 1 ))" ; }
+test_assert_equal "$(lmap func)" ""
+test_assert_equal "$(lmap func 1 2 3)" $'2\n3\n4'
+test_assert_rc 1 lmap false 1 2 3
