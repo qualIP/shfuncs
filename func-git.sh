@@ -210,6 +210,13 @@ git_dir() {
     GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git rev-parse --git-dir
 }
 
+## cache_git_dir
+#
+# Resolves and exports the GIT_DIR environment variable.
+cache_git_dir() {
+    GIT_DIR=${GIT_DIR:-$(git_dir)} ; export GIT_DIR
+}
+
 ## git_path path
 #
 # Resolves "$GIT_DIR/<path>".
