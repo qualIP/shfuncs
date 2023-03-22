@@ -34,7 +34,7 @@ rm -Rf "$TEST_TMP_DIR"
 mkdir "$TEST_TMP_DIR"
 mkdir "$TEST_TMP_DIR/a"
 pushd "$TEST_TMP_DIR/a" > /dev/null
-git init
+git init -b main
 test_case test_git_changeset
 git_eval_changeset_state
 test_assert_equal "$(git_changeset_state_cached)" "clean-notpushed"
