@@ -104,6 +104,13 @@ test_assert_equal "$(log_cmd_live echo "abc")" "    $ echo abc
     abc"
 test_assert_equal "$(<"$OUT_TMP")" "abc"
 
+test_case log_cmd_live-x
+echo OLD > "$OUT_TMP"
+set -x
+log_cmd_live echo "abc" > /dev/null
+set +x
+test_assert_equal "$(<"$OUT_TMP")" "abc"
+
 test_case log_cmd_live_quiet
 echo OLD > "$OUT_TMP"
 test_assert_equal "$(log_cmd_live_quiet echo "abc")" ""

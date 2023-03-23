@@ -107,6 +107,7 @@ run_cmd_piped() {
     local file="$1" ; shift
     local state ; state=$(set +o) ; [[ -n "${BASH_SOURCE:-}" ]] && shopt -qo errexit && state="$state ; set -e"
     has_pipefail && set -o pipefail
+    set +x
     if { { "$@" ; } 2>&1 ; } | tee "$file"
     then local rc=0 ; else local rc=$? ; fi
     eval "$state"
