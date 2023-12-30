@@ -168,6 +168,12 @@ test_assert_equal "$(lappend VAR d e f)" ""
 lappend VAR d e f
 test_assert_equal "$VAR" "a b c d e f"
 
+test_case lappend-5
+VAR=$'a\nb\nc'
+test_assert_equal "$(lappend VAR d e f)" ""
+lappend VAR d e f
+test_assert_equal "$VAR" "a b c d e f"
+
 test_case lpop-1
 VAR=
 test_assert_rc 1 lpop VAR
