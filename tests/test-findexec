@@ -43,7 +43,7 @@ test_assert_equal "$(findexec env path-does-not-exist)" "$(which env)"
 setup_tty_colors
 
 test_case next_in_path
-PATH=/usr/bin:/bin test_assert_equal "$(next_in_path /usr/bin/touch)" "/bin/touch"
+test_assert_equal "$(PATH=/usr/bin:/bin next_in_path /usr/bin/touch)" "/bin/touch"
 
 test_case realpath
 test_assert_equal "$(_realpath /some-path///)" "/some-path"

@@ -79,9 +79,13 @@ next_in_path() {
     local bindir ; bindir=$(cd "$(dirname "$bin")" && pwd)
     local bindir_found=false
     local p
-    local old_IFS="$IFS" ; IFS=":"
-    for p in $pathenv ; do
-        IFS="$old_IFS"
+    local paths
+    if [[ -n "${ZSH_VERSION:-}" ]] ; then
+        IFS=: read -r -A paths <<<"$pathenv"
+    else
+        IFS=: read -r -a paths <<<"$pathenv"
+    fi
+    for p in "${paths[@]}" ; do
         if $bindir_found ; then
             if [[ -x "$p/$binname" ]] ; then
                 echo "$p/$binname"
