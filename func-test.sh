@@ -51,6 +51,12 @@ test_assert_equal() {
     local desc=${1:-} ; (( $# )) && shift
     if ! [[ "$v1" == "$v2" ]] ; then
         print_err "${desc:-test_assert_equal} failed: '$v1' == '$v2'"
+        echo v1:
+        echo -n "$v1" | hexdump -c
+        echo v2:
+        echo -n "$v2" | hexdump -c
+        echo diff:
+        diff --label v1 <(echo "$v1") --label v2 <(echo "$v2") >&2 || true
         return 1
     fi
 }
