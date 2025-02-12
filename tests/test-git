@@ -37,6 +37,7 @@ mkdir "$TEST_TMP_DIR"
 mkdir "$TEST_TMP_DIR/a"
 pushd "$TEST_TMP_DIR/a" > /dev/null
 git init -b main
+git remote add origin git@github.com:dummy.git
 test_case test_git_changeset
 git_eval_changeset_state
 test_assert_equal "$(git_changeset_state_cached | sed 's/-noupstream//')" "clean-notpushed"
@@ -189,7 +190,7 @@ test_case git_upstream_branch
 test_assert_equal "$(git_upstream_branch)" ""
 if false ; then
     # TODO fatal: ambiguous argument '@{u}': unknown revision or path not in the working tree.
-    git remote add remote1 git@github.com:dummy.git
+    git remote add remote1 git@github.com:dummy-remote1.git
     git checkout A
     test_assert_equal "$(git_upstream_branch)" ""
     # git branch --set-upstream-to=remote1 otherA
@@ -214,7 +215,7 @@ test_assert_rc 1 git_tag_exists A
 # TODO git_remote_branch_exists
 
 test_case git_ref_type
-git remote add remote2 git@github.com:dummy.git
+git remote add remote2 git@github.com:dummy-remote2.git
 test_assert_equal "$(git_ref_type A)" "branch"
 test_assert_equal "$(git_ref_type T)" "tag"
 # TODO test_assert_equal "$(git_ref_type remote2/main)" "remote"
@@ -222,6 +223,16 @@ test_assert_equal "$(git_ref_type "$(git rev-parse HEAD)")" "hash"
 test_assert_rc 1 git_ref_type notabranch
 test_assert_rc 1 git_ref_type deaddeadbeef
 test_assert_rc 1 git_ref_type remote2/main
+
+test_case git_repo
+test_assert_equal "$(git_repo)" "git@github.com:dummy"
+test_assert_equal "$(git_repo origin)" "git@github.com:dummy"
+test_assert_equal "$(git_repo remote2)" "git@github.com:dummy-remote2"
+
+test_case git_repo-not-exist
+test_assert_rc 0 git_repo not-exist
+test_assert_equal "$(git_repo not-exist)" ""
+test_assert_equal "$(git_repo not-exist 2>&1)" "error: No such remote 'not-exist'"
 
 popd > /dev/null
 
