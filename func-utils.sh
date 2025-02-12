@@ -52,6 +52,28 @@ utils_set_cleanup_function() {
     trap '_utils_trap_handler TERM' 15
 }
 
+utils_init_OUT_TMP_DIR() {
+    local prog=${1:-$(basename "$0")}
+    OUT_TMP_DIR="${TMPDIR:-/tmp}/$prog.$$.tmp"
+    OUT_TMP="$OUT_TMP_DIR/out.tmp"
+    mkdir -p "$OUT_TMP_DIR"
+}
+
+utils_init_OUT_TMP() {
+    local prog=${1:-$(basename "$0")}
+    OUT_TMP="${TMPDIR:-/tmp}/$prog.$$.out.tmp"
+}
+
+utils_cleanup_OUT_TMP_DIR() {
+    [[ -n "${OUT_TMP_DIR:-}" ]] || return 0
+    [[ -d "$OUT_TMP_DIR" ]] && rm -Rf "$OUT_TMP_DIR"
+}
+
+utils_cleanup_OUT_TMP() {
+    [[ -n "${OUT_TMP:-}" ]] || return 0
+    [[ -f "$OUT_TMP" ]] && rm -f "$OUT_TMP"
+}
+
 _curl_get_compressed_arg_known=false
 _curl_get_compressed_arg=
 curl_get_compressed_arg() {
