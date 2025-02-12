@@ -403,6 +403,17 @@ git_upstream_branch() {
     fi
 }
 
+git_sha_exists() {
+    local sha_in ; sha_in=$1 ; shift
+    local sha_expand ;
+    if sha_expand=$(GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git rev-parse "$sha_in" 2> /dev/null) ; then
+        if [[ -n "$sha_expand" ]] && [[ $sha_expand =~ ^$sha_in.* ]] ; then
+            return 0
+        fi
+    fi
+    return 1
+}
+
 git_branch_exists() {
     GIT_OPTIONAL_LOCKS=${GIT_OPTIONAL_LOCKS:-0} git show-ref --verify --quiet "refs/heads/$1"
 }

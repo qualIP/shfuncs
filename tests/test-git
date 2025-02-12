@@ -234,6 +234,13 @@ test_assert_rc 0 git_repo not-exist
 test_assert_equal "$(git_repo not-exist)" ""
 test_assert_equal "$(git_repo not-exist 2>&1)" "error: No such remote 'not-exist'"
 
+test_case git_sha_exists
+test_assert_rc 1 git_sha_exists HEAD
+test_assert_rc 0 git_sha_exists "$(git rev-parse HEAD)"
+test_assert_rc 1 git_sha_exists "$(git_branch)"
+test_assert_rc 0 git_sha_exists "$(git rev-parse "$(git_branch)")"
+test_assert_rc 1 git_sha_exists 12345678
+
 popd > /dev/null
 
 rm -Rf "$TEST_TMP_DIR"
