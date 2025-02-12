@@ -440,6 +440,24 @@ git_ref_type() {
     fi
 }
 
+# Git may require access to tty for signing. log_cmd_live_pty causes issues
+# with pinentry-curses so use interactive mode.
+log_cmd_git_pty() {
+    # log_cmd_live_maybe_pty "$@"
+    log_cmd_interactive "$@"
+}
+log_cmd_git_pty_quiet() {
+    # log_cmd_live_maybe_pty_quiet "$@"
+    log_cmd_interactive_quiet "$@"
+}
+
+log_cmd_git_nostatus() {
+    log_cmd_nostatus "$@"
+}
+log_cmd_git_nostatus_quiet() {
+    log_cmd_nostatus_quiet "$@"
+}
+
 eval "$_qip_func_git_saved_state" ; unset _qip_func_git_saved_state
 
 # vim: ft=bash

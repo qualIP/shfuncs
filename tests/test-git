@@ -241,6 +241,12 @@ test_assert_rc 1 git_sha_exists "$(git_branch)"
 test_assert_rc 0 git_sha_exists "$(git rev-parse "$(git_branch)")"
 test_assert_rc 1 git_sha_exists 12345678
 
+test_case log_cmd_git_pty
+test_assert_equal "$(log_cmd_git_pty git status)" "$(log_cmd_interactive git status)"
+
+test_case log_cmd_git_nostatus
+test_assert_equal "$(log_cmd_git_nostatus git status)" "$(log_cmd_nostatus git status)"
+
 popd > /dev/null
 
 rm -Rf "$TEST_TMP_DIR"
