@@ -464,6 +464,39 @@ git_parse_branch() {
     echo "$git_branch"
 }
 
+git_editor() {
+    local strict=${1:-false}
+    if [[ -n "${GIT_EDITOR:-}" ]] ; then
+        echo "$GIT_EDITOR"
+        return
+    fi
+    local git_editor
+    git_editor=$(git config --get core.editor || true)
+    if [[ -n "$git_editor" ]] ; then
+        echo "$git_editor"
+        return
+    fi
+    if [[ -n "${EDITOR:-}" ]] ; then
+        echo "$EDITOR"
+        return
+    fi
+    if [[ -n "${VISUAL:-}" ]] ; then
+        echo "$VISUAL"
+        return
+    fi
+    if ! $strict ; then
+        if type -P nvim > /dev/null ; then
+            echo "nvim"
+            return
+        fi
+        if type -P vim > /dev/null ; then
+            echo "vim"
+            return
+        fi
+    fi
+    echo "vi"
+}
+
 eval "$_qip_func_git_saved_state" ; unset _qip_func_git_saved_state
 
 # vim: ft=bash

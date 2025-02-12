@@ -254,6 +254,28 @@ test_assert_equal "$(git_parse_branch origin/main)" "origin/main"
 test_assert_equal "$(git_parse_branch refs/heads/main)" "main"
 test_assert_equal "$(git_parse_branch refs/heads/origin/main)" "origin/main"
 
+test_case git_editor
+unset GIT_EDITOR
+unset VISUAL
+unset EDITOR
+test_assert_equal "$(git_editor | sed -E 's/nvim/vim/')" "vim"
+test_assert_equal "$(git_editor false | sed -E 's/nvim/vim/')" "vim"
+test_assert_equal "$(git_editor true)" "vi"
+
+test_case git_editor-VISUAL
+test_assert_equal "$(VISUAL=V git_editor true)" "V"
+
+test_case git_editor-EDITOR
+test_assert_equal "$(VISUAL=V EDITOR=E git_editor true)" "E"
+
+test_case git_editor-core.editor
+git config set core.editor CE
+test_assert_equal "$(VISUAL=V EDITOR=E git_editor true)" "CE"
+
+test_case git_editor-GIT_EDITOR
+test_assert_equal "$(VISUAL=V EDITOR=E GIT_EDITOR=GE git_editor true)" "GE"
+git config unset core.editor
+
 popd > /dev/null
 
 rm -Rf "$TEST_TMP_DIR"
