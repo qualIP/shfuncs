@@ -124,4 +124,20 @@ beep() {
     echo -n   ;# beep!
 }
 
+is_login_shell() {
+    if is_zsh ; then
+        [[ -o login ]]
+    else
+        shopt -q login_shell
+    fi
+}
+
+is_interactive_shell() {
+    if is_zsh ; then
+        [[ -o interactive ]]
+    else
+        [[ $- == *i* ]]
+    fi
+}
+
 # vim: ft=bash
