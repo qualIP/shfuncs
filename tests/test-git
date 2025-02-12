@@ -84,8 +84,8 @@ test_assert_equal "$(git_path "$GIT_MERGE_HEAD_FILE")" ".git/MERGE_HEAD"
 test_assert_equal "$(GIT_DIR=$(pwd)/.git git_path "$GIT_MERGE_HEAD_FILE")" "$(pwd)/.git/MERGE_HEAD"
 
 test_case cache_git_dir
-test_assert_equal "$(export GIT_DIR=dummy && cache_git_dir && env | grep "^GIT_DIR=")" "GIT_DIR=dummy"
-test_assert_equal "$(unset GIT_DIR && cache_git_dir && env | grep  "^GIT_DIR=")" "GIT_DIR=.git"
+test_assert_equal "$(export GIT_DIR=dummy && cache_git_dir && env | grep "^GIT_DIR=")" "GIT_DIR=$(readlink -f dummy)"
+test_assert_equal "$(unset GIT_DIR && cache_git_dir && env | grep  "^GIT_DIR=")" "GIT_DIR=$(readlink -f .git)"
 unset GIT_DIR
 
 test_case git_toplevel

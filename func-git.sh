@@ -229,7 +229,7 @@ git_dir() {
 #
 # Resolves and exports the GIT_DIR environment variable.
 cache_git_dir() {
-    GIT_DIR=${GIT_DIR:-$(git_dir)} ; export GIT_DIR
+    GIT_DIR=$(readlink -f "${GIT_DIR:-$(git_dir)}") ; export GIT_DIR
 }
 
 ## git_path path
