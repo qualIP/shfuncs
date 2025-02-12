@@ -30,3 +30,6 @@ has_pipefail && set -o pipefail
 
 # TODO test_case utils_set_cleanup_function
 # TODO test_case utils_run_curl
+
+test_case utils_run_curl
+test_assert_equal "$(term_hyperl http://site.com/page "TEXT")" "$(printf '\e]8;;http://site.com/page\e\\TEXT\e]8;;\e\\\n')"

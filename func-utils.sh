@@ -175,4 +175,22 @@ is_interactive_shell() {
     fi
 }
 
+# https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
+term_hyperl_open() {
+    local href=$1
+    printf '\e]8;;%s\e\\' "$href"
+}
+term_hyperl_close() {
+    printf '\e]8;;\e\\\n'
+}
+
+term_hyperl() {
+    local href=$1
+    local text=$2
+    printf "%s%s%s" \
+        "$(term_hyperl_open "$href")" \
+        "$text" \
+        "$(term_hyperl_close)"
+}
+
 # vim: ft=bash
