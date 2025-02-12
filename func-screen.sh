@@ -21,6 +21,23 @@ if [ -z "${BASH_VERSION:-}${ZSH_VERSION:-}" ] ; then echo Not running bash or zs
 
 typeset -f screen_new_window > /dev/null && return
 
+# shellcheck disable=all
+SHFUNCS_DIR=${SHFUNCS_DIR:-$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")}
+. "$SHFUNCS_DIR/func-print.sh"
+
+tmux_find_session() {
+    local target ; target="$1" ; shift
+    local session_name tmux_session
+    while read -r session_name tmux_session ; do
+        if [[ "$session_name" = "$target" ]] ; then
+            echo "$tmux_session"
+            return 0
+        fi
+    done <<<"$(tmux list-sessions -F '#{session_name} #{socket_path},#{pid},0')"
+    print_err "No such tmux session: $target"
+    return 1
+}
+
 ## screen_new_window [args ...]
 screen_new_window() {
     if [[ "${WINDOW:+set}" = "set" ]] ; then
