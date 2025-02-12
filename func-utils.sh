@@ -120,6 +120,19 @@ with_OUT_TMP() {
     return $rc
 }
 
+with_sane_SHELL() {
+    local old_SHELL=${SHELL:-}
+    if [[ -n "${ZSH_VERSION:-}" ]] ; then
+        export SHELL=/bin/zsh
+    else
+        export SHELL=/bin/bash
+    fi
+    if "$@"
+    then local rc=0 ; else local rc=$? ; fi
+    SHELL=${old_SHELL}
+    return $rc
+}
+
 beep() {
     echo -n   ;# beep!
 }

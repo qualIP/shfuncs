@@ -42,3 +42,31 @@ if is_zsh ; then
 else
     has_pipefail() { true ; }
 fi
+
+if is_zsh && [[ -o monitor ]]  ; then
+    # Zsh with job control enabled
+    without_zsh_job_control() {
+        if false ; then
+            # NOTE Could also run in a sub-shell: ( "$@" )
+            if [[ -o monitor ]] ; then
+                unsetopt monitor
+                if "$@"
+                then local rc=0 ; else local rc=$? ; fi
+                setopt monitor
+            else
+                if "$@"
+                then local rc=0 ; else local rc=$? ; fi
+            fi
+        else
+            if ( "$@" )
+            then local rc=0 ; else local rc=$? ; fi
+        fi
+        return $rc
+    }
+else
+    # Zsh without job control (could be a sub-shell) or Bash
+    # no=op
+    without_zsh_job_control() {
+        "$@"
+    }
+fi

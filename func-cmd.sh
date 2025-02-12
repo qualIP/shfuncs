@@ -26,6 +26,7 @@ SHFUNCS_DIR=${SHFUNCS_DIR:-$(dirname "${BASH_SOURCE[0]:-${(%):-%x}}")}
 . "$SHFUNCS_DIR/func-compat.sh"
 . "$SHFUNCS_DIR/func-print.sh"
 . "$SHFUNCS_DIR/func-args.sh"
+. "$SHFUNCS_DIR/func-utils.sh"
 
 ## run_indent cmd ...
 #
@@ -78,25 +79,22 @@ run_cmd_redirected_nohup() {
 ## run_cmd_redirected_pty file cmd ...
 #
 # Executes the command in a pseudoterminal.
-# stdout and stderr are both redirected to file (use clean_redirected_cmd_output).
+# stdout and stderr are both redirected to file (use clean_script_artifacts_from_cmd_output).
 run_cmd_redirected_pty() {
     local file="$1" ; shift
     _run_cmd_piped_pty_internal REDIR "$file" "$@"
 }
 
 # shellcheck disable=SC2120
-## clean_redirected_cmd_output [file]
+## clean_script_artifacts_from_cmd_output [file]
 #
 # Cleans `script` artifacts from piped or file input.
-clean_redirected_cmd_output() {
+clean_script_artifacts_from_cmd_output() {
     if (( $# > 1 )) ; then
-        print_err "clean_redirected_cmd_output: Invalid syntax"
+        print_err "clean_script_artifacts_from_cmd_output: Invalid syntax"
         return 1
     fi
-    sed -e '
-        1 { /^Script started/ d }
-        $ { /^Script done/ d }
-    ' "$@"
+    sed -u -e ' 1 { /^Script started/ d } ; $ { /^Script done/ d } ' "$@"
 }
 
 ## run_cmd_piped file cmd ...
@@ -128,7 +126,7 @@ _run_script_version=
 ## run_cmd_piped_pty file cmd ...
 #
 # Executes the command in a pseudoterminal.
-# stdout and stderr are both copied to file (use clean_redirected_cmd_output)
+# stdout and stderr are both copied to file (use clean_script_artifacts_from_cmd_output)
 # and output on stdout (clean).
 run_cmd_piped_pty() {
     _run_cmd_piped_pty_internal CLEAN "$@"
@@ -141,6 +139,24 @@ run_cmd_piped_pty() {
 # If flags is "CLEAN", clean output is sent to stdout.
 # If flags is "REDIR", output is simply redirected.
 _run_cmd_piped_pty_internal() {
+    local flags="$1" ; shift
+    if [[ "$flags" = "CLEAN" ]] ; then
+        # Zsh's job control hangs with CLEAN flag: `script` gets blocked on
+        # SIGTTOU as if it was a background job even if both stdout and stderr
+        # are redirected. Looks like Zsh is duping the terminal fd and
+        # accessing it inside the fork.
+        # REDIR flag is fine.
+        # Should be safe for other flags, if the issue is reproducible.
+        # This has nothing to do with Zsh's multios option.
+        without_zsh_job_control _run_cmd_piped_pty_internal2 "$flags" "$@"
+    else
+        _run_cmd_piped_pty_internal2 "$flags" "$@"
+    fi
+}
+## _run_cmd_piped_pty_internal2 flags file cmd ...
+#
+# Implementation for _run_cmd_piped_pty_internal.
+_run_cmd_piped_pty_internal2() {
     local flags="$1" ; shift
     local file="$1" ; shift
     local cmd ; cmd=$(quote_args "$@")
@@ -164,15 +180,16 @@ _run_cmd_piped_pty_internal() {
     if [[ "$_run_script_version" = "util-linux" ]] ; then
         case "$flags" in
             CLEAN)
-                if script --flush --quiet --command "$colcmd$cmd" --return "$file" | clean_redirected_cmd_output
+                # No need, --quiet should work: clean_script_artifacts_from_cmd_output
+                if with_sane_SHELL script --flush --quiet --command "$colcmd$cmd" --return "$file"
                 then local rc=0 ; else local rc=$? ; fi
                 ;;
             REDIR)
-                if script --flush --quiet --command "$colcmd$cmd" --return "$file" > /dev/null
+                if with_sane_SHELL script --flush --quiet --command "$colcmd$cmd" --return "$file" > /dev/null
                 then local rc=0 ; else local rc=$? ; fi
                 ;;
             *)
-                if script --flush --quiet --command "$colcmd$cmd" --return "$file"
+                if with_sane_SHELL script --flush --quiet --command "$colcmd$cmd" --return "$file"
                 then local rc=0 ; else local rc=$? ; fi
                 ;;
         esac
@@ -180,15 +197,15 @@ _run_cmd_piped_pty_internal() {
         # TODO colcmd
         case "$flags" in
             CLEAN)
-                if script -F -q "$file" "$@" | clean_redirected_cmd_output
+                if with_sane_SHELL script -F -q "$file" "$@" | clean_script_artifacts_from_cmd_output
                 then local rc=0 ; else local rc=$? ; fi
                 ;;
             REDIR)
-                if script -F -q "$file" "$@" > /dev/null
+                if with_sane_SHELL script -F -q "$file" "$@" > /dev/null
                 then local rc=0 ; else local rc=$? ; fi
                 ;;
             *)
-                if script -F -q "$file" "$@"
+                if with_sane_SHELL script -F -q "$file" "$@"
                 then local rc=0 ; else local rc=$? ; fi
                 ;;
         esac
@@ -365,7 +382,7 @@ log_cmd_live_nohup_quiet() {
 #
 # Logs and executes the command under a pseudopty.
 # No continuation dots.
-# Output is piped to stdout (clean) and OUT_TMP (use clean_redirected_cmd_output).
+# Output is piped to stdout (clean) and OUT_TMP (use clean_script_artifacts_from_cmd_output).
 # Status is printed on error only.
 log_cmd_live_pty() {
     local loc_OUT_TMP=${OUT_TMP:-${TMPDIR:-/tmp}/$$.out.tmp}
