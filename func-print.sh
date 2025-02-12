@@ -328,11 +328,20 @@ set_print_shell_type "$SHELL"
 
 set_debug_mode() {
     if ${1:-true} ; then
-        PS4="+[\t] "
+        if [[ -n "${ZSH_VERSION:-}" ]] ; then
+            # PS4="+[%N:%i>%D{%H:%M:%S.%.}] "
+            PS4="+[%D{%H:%M:%S.%.}] "
+        else
+            PS4="+[\t] "
+        fi
         set -x
     else
         set +x
-        PS4="+ "
+        if [[ -n "${ZSH_VERSION:-}" ]] ; then
+            PS4="+%N:%i> "
+        else
+            PS4="+ "
+        fi
     fi
 }
 
