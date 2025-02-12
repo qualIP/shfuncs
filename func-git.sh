@@ -111,10 +111,32 @@ git_eval_changeset_state() {
         if [[ "$_git_changeset_state" =~ ^clean ]] ; then
             if ${GREP:-grep} -q "^On branch " "$OUT_TMP" ; then
                 # On branch xyz
-                if ! ${GREP:-grep} -q "^Your branch is up to date with " "$OUT_TMP" ; then
+                if ${GREP:-grep} -q "^Your branch is up to date with " "$OUT_TMP" ; then
+                    # Your branch is up to date with 'origin/xyz'.
+                    true
+                elif ${GREP:-grep} -q "^Your branch is behind '.*' by [0-9]* commits, and can be fast-forwarded." "$OUT_TMP" ; then
+                    # Your branch is behind 'origin/xyz' by 12 commits, and can be fast-forwarded.
+                    _git_changeset_state+="-behind"
+                    true
+                else
                     # Your branch is based on 'origin/xyz', but the upstream is gone.
-                    # (not) Your branch is up to date with 'origin/xyz'.
-                    _git_changeset_state+="-notpushed"
+                    if git_upstream_branch > /dev/null 2> /dev/null ; then
+                        _git_changeset_state+="-notpushed"
+                    else
+                        _git_changeset_state+="-noupstream"
+                        local remote
+                        local branch ; branch=$(git_branch)
+                        for remote in $(git remote) ; do
+                            if git merge-base --is-ancestor "$branch" "$remote/$branch" > /dev/null 2> /dev/null ; then
+                                :  # Remote is in sync or newer
+                                break
+                            fi
+                            remote=
+                        done
+                        if [[ -z $remote ]] ; then
+                            _git_changeset_state+="-notpushed"
+                        fi
+                    fi
                 fi
             fi
         fi
@@ -140,7 +162,7 @@ git_changeset_state_cached() {
 test_git_changeset() {
     local untracked_ok=true
     local branch_not_pushed_ok=true
-    local git_changeset_state
+    local git_changeset_state=
     while (( $# )) ; do
         case "$1" in
             --changeset-state) git_changeset_state="$2" ; shift 2 ;;
@@ -151,7 +173,7 @@ test_git_changeset() {
             *) print_err "Invalid argument: $1" ; return 1 ;;
         esac
     done
-    if [[ -z "$git_changeset_state" ]] ; then
+    if [[ -z "$git_changeset_state" ]] || is_interactive_shell ; then
         git_eval_changeset_state || return $?
         git_changeset_state=$(git_changeset_state_cached)
     fi
@@ -160,36 +182,29 @@ test_git_changeset() {
             print_status "Worktree clean" FAIL "(uncommitted changes present)"
             return 1
             ;;
-        clean)
-            print_status "Worktree clean" PASS
-            return 0
-            ;;
-        clean-notpushed)
-            if $branch_not_pushed_ok ; then
-                print_status "Worktree clean" PASS "(branch not pushed)"
-                return 0
-            else
-                print_status "Worktree clean" FAIL "(branch not pushed)"
-                return 1
+        clean*)
+            local desc=""
+            local rc=0
+            if [[ "$git_changeset_state" =~ untracked ]] ; then
+                $untracked_ok || rc=1
+                desc="${desc:+$desc; }untracked files present"
             fi
-            ;;
-        clean-untracked)
-            if $untracked_ok ; then
-                print_status "Worktree clean" PASS "(untracked files present)"
-                return 0
-            else
-                print_status "Worktree clean" FAIL "(untracked files present)"
-                return 1
+            if [[ "$git_changeset_state" =~ noupstream ]] ; then
+                desc="${desc:+$desc; }no upstream configured"
             fi
-            ;;
-        clean-untracked-notpushed)
-            if $untracked_ok && $branch_not_pushed_ok ; then
-                print_status "Worktree clean" PASS "(untracked files present; branch not pushed)"
-                return 0
-            else
-                print_status "Worktree clean" FAIL "(untracked files present; branch not pushed)"
-                return 1
+            if [[ "$git_changeset_state" =~ behind ]] ; then
+                desc="${desc:+$desc; }branch behind"
             fi
+            if [[ "$git_changeset_state" =~ notpushed ]] ; then
+                $branch_not_pushed_ok || rc=1
+                desc="${desc:+$desc; }branch not pushed"
+            fi
+            if (( $rc == 0 )) ; then
+                print_status "Worktree clean" PASS "$desc"
+            else
+                print_status "Worktree clean" FAIL "$desc"
+            fi
+            return $rc
             ;;
         dirty)
             print_status "Worktree clean" FAIL "(uncommitted changes present)"

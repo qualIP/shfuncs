@@ -39,14 +39,14 @@ pushd "$TEST_TMP_DIR/a" > /dev/null
 git init -b main
 test_case test_git_changeset
 git_eval_changeset_state
-test_assert_equal "$(git_changeset_state_cached)" "clean-notpushed"
+test_assert_equal "$(git_changeset_state_cached | sed 's/-noupstream//')" "clean-notpushed"
 test_assert_rc 0 test_git_changeset
 test_assert_rc 0 test_git_changeset --branch-not-pushed-ok
 test_assert_rc 1 test_git_changeset --branch-not-pushed-fail
 echo 1 > a
 (set -x ; cat a)
 git_eval_changeset_state
-test_assert_equal "$(git_changeset_state_cached)" "clean-untracked-notpushed"
+test_assert_equal "$(git_changeset_state_cached | sed 's/-noupstream//')" "clean-untracked-notpushed"
 test_assert_rc 0 test_git_changeset
 test_assert_rc 0 test_git_changeset --untracked-ok
 test_assert_rc 1 test_git_changeset --untracked-fail
@@ -58,7 +58,7 @@ test_assert_equal "$(git_changeset_state_cached)" "dirty"
 test_assert_rc 1 test_git_changeset
 git commit -m a1 --no-gpg-sign
 git_eval_changeset_state
-test_assert_equal "$(git_changeset_state_cached)" "clean-notpushed"
+test_assert_equal "$(git_changeset_state_cached | sed 's/-noupstream//')" "clean-notpushed"
 test_assert_rc 0 test_git_changeset
 echo 2 > a
 (set -x ; cat a)
@@ -68,7 +68,7 @@ test_assert_rc 1 test_git_changeset
 git worktree add ../b
 cd ../b
 git_eval_changeset_state
-test_assert_equal "$(git_changeset_state_cached)" "clean-notpushed"
+test_assert_equal "$(git_changeset_state_cached | sed 's/-noupstream//')" "clean-notpushed"
 test_assert_rc 0 test_git_changeset
 cd ../a
 
