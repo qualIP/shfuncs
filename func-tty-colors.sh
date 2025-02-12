@@ -22,6 +22,22 @@ if [ -z "${BASH_VERSION:-}${ZSH_VERSION:-}" ] ; then echo Not running bash or zs
 # Might want to be able re-source...
 typeset -f setup_tty_colors > /dev/null && return
 
+tty_light_or_dark_mode() {
+    local fgbg=${COLORFGBG:-15;0}
+    local bg=${fgbg#*;}
+    case "$bg" in
+        0) echo dark ;;
+        *) echo light ;;
+    esac
+}
+tty_light_or_dark_mode_choice() {
+    if [[ "$(tty_light_or_dark_mode)" = "light" ]] ; then
+        echo "${1:-}"
+    else
+        echo "${2:-}"
+    fi
+}
+
 # shellcheck disable=SC2034
 tty_colors_off() {
     tty_colors_mode=off
@@ -57,6 +73,8 @@ tty_colors_off() {
     # Special
     hoPRE=""
     hcPRE=""
+    cFG=""
+    cFGb=""
 }
 
 # shellcheck disable=SC2034
@@ -96,6 +114,8 @@ tty_colors_on() {
     # Special
     hoPRE=""
     hcPRE=""
+    cFG=$(tty_light_or_dark_mode_choice  "$cBLACK"  "$cWHITE")
+    cFGb=$(tty_light_or_dark_mode_choice "$cBLACKb" "$cWHITEb")
 }
 
 # shellcheck disable=SC2034
@@ -145,5 +165,30 @@ setup_tty_colors() {
     fi
 }
 setup_tty_colors
+
+test_tty_colors() {
+    local var val
+    for var in \
+        cBLACK \
+        cBLACKb \
+        cRED \
+        cREDb \
+        cGREEN \
+        cGREENb \
+        cYELLOW \
+        cYELLOWb \
+        cBLUE \
+        cBLUEb \
+        cMAGENTA \
+        cMAGENTAb \
+        cCYAN \
+        cCYANb \
+        cWHITE \
+        cWHITEb \
+    ; do
+        eval val="\${$var:-\"(not set)\"}"
+        echo "${val}This is $var$cOFF"
+    done
+}
 
 # vim: ft=bash

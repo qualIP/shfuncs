@@ -177,9 +177,9 @@ _print_status_internal() {
     if [[ "$n$s$sep" = "-0" ]] ; then
         printf "%s\n" "$*"
     elif [[ -n "$*" ]] ; then
-        printf "${cBLACKb:-}%${n}s${cOFF:-} %s\n" "$s$sep" "$*"
+        printf "${cFGb:-}%${n}s${cOFF:-} %s\n" "$s$sep" "$*"
     else
-        printf "${cBLACKb:-}%s${cOFF:-}\n" "$s$sep"
+        printf "${cFGb:-}%s${cOFF:-}\n" "$s$sep"
     fi
     _last_print_is_nl=false
 }
@@ -211,7 +211,7 @@ print_status() {
         WARNING)   c=${cMAGENTA:-}       ;;
         NA|N/A)    c=${cYELLOW:-} s=N/A  ;;
         TODO)      c=${cMAGENTA:-} b=${cbBLUE} ;;
-        ...)       c=${cBLACKb:-}        ;;
+        ...)       c=${cFGb:-}           ;;
         +([A-Z-])) c=${cRED:-}           ;;
     esac
     if [[ -n "$s" ]] ; then
@@ -370,7 +370,7 @@ print_em() {
 }
 
 print_li() {
-    _print "${hoPRE:-}- ${cBLACKb:-}$*${cOFF:-}${hcPRE:-}"
+    _print "${hoPRE:-}- ${cFGb:-}$*${cOFF:-}${hcPRE:-}"
 }
 
 ## print_vars var1 var2 ...
