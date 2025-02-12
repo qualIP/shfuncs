@@ -123,42 +123,23 @@ prompt_q_default_choices() {
     declare -g "$_prompt_q_var=$_prompt_q_a"
 }
 
-prompt_q_yn() {
-    local _prompt_q_var=$1 ; shift
-    local _prompt_q_q=$1 ; shift
-    local _prompt_q_choices="y/n"
-    local _prompt_q_a=
-    while true ; do
-        print_q "$_prompt_q_q" "$_prompt_q_choices"
-        read -r _prompt_q_a
-        _last_print_is_nl=false
-        # Default
-        # Validation
-        case "x$_prompt_q_a" in
-            xY|xy) _prompt_q_a=true ;;
-            xN|xn) _prompt_q_a=false ;;
-            *)
-                print_err "Invalid choice"
-                continue
-                ;;
-        esac
-        break
-    done
-    declare -g "$_prompt_q_var=$_prompt_q_a"
-}
-
 prompt_q_default_yn() {
     local _prompt_q_var=$1 ; shift
     local _prompt_q_q=$1 ; shift
     local _prompt_q_default=$1 ; shift
     local _prompt_q_choices=
     if [[ "$_prompt_q_default" = "true" ]] ; then
-        _prompt_q_choices="Y/n"
+        _prompt_q_choices="Yn"
     elif [[ "$_prompt_q_default" = "false" ]] ; then
-        _prompt_q_choices="y/N"
+        _prompt_q_choices="yN"
     else
-        _prompt_q_choices="y/n"
+        _prompt_q_choices="yn"
     fi
+    local _prompt_q_choices_arr=( "$@" )
+    local _prompt_q_c=
+    for _prompt_q_c in "${_prompt_q_choices_arr[@]}" ; do
+        _prompt_q_choices+="$_prompt_q_c"
+    done
     local _prompt_q_a=
     while true ; do
         print_q "$_prompt_q_q" "$_prompt_q_choices"
@@ -174,13 +155,21 @@ prompt_q_default_yn() {
             Y|y|yes|Yes|YES) _prompt_q_a=true ;;
             N|n|no|No|NO)    _prompt_q_a=false ;;
             *)
-                print_err "Invalid choice"
-                continue
+                if ! lcontain "$_prompt_q_a" "${_prompt_q_choices_arr[@]}" ; then
+                    print_err "Invalid choice"
+                    continue
+                fi
                 ;;
         esac
         break
     done
     declare -g "$_prompt_q_var=$_prompt_q_a"
+}
+
+prompt_q_yn() {
+    local _prompt_q_var=$1 ; shift
+    local _prompt_q_q=$1 ; shift
+    prompt_q_default_yn "$_prompt_q_var" "$_prompt_q_q" "" "$@"
 }
 
 eval "$_qip_func_prompt_saved_state" ; unset _qip_func_prompt_saved_state
