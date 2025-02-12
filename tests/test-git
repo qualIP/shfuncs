@@ -247,6 +247,13 @@ test_assert_equal "$(log_cmd_git_pty git status)" "$(log_cmd_interactive git sta
 test_case log_cmd_git_nostatus
 test_assert_equal "$(log_cmd_git_nostatus git status)" "$(log_cmd_nostatus git status)"
 
+test_case git_parse_branch
+test_assert_equal "$(git_parse_branch "")" ""
+test_assert_equal "$(git_parse_branch main)" "main"
+test_assert_equal "$(git_parse_branch origin/main)" "origin/main"
+test_assert_equal "$(git_parse_branch refs/heads/main)" "main"
+test_assert_equal "$(git_parse_branch refs/heads/origin/main)" "origin/main"
+
 popd > /dev/null
 
 rm -Rf "$TEST_TMP_DIR"

@@ -458,6 +458,12 @@ log_cmd_git_nostatus_quiet() {
     log_cmd_nostatus_quiet "$@"
 }
 
+git_parse_branch() {
+    local git_branch ; git_branch=$1
+    git_branch="${git_branch#refs/heads/}"
+    echo "$git_branch"
+}
+
 eval "$_qip_func_git_saved_state" ; unset _qip_func_git_saved_state
 
 # vim: ft=bash
