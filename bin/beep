@@ -1,2 +1,15 @@
 #!/bin/sh
-echo -n 
+
+# Usage: beep [cmd [args...]]
+
+set -e
+rc=0
+
+# Optional command to run
+if [ "$#" != 0 ] ; then
+    ("$@") || rc=$?
+fi
+
+echo -n ""
+
+exit $rc
