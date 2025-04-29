@@ -41,6 +41,13 @@ is_regexp_pattern() {
     esac
 }
 
+escape_regexp_sub() {
+    sed -E -e '
+        s@\\@\\\\@g
+        s@[@,/&]@\\&@g
+    ' "$@"
+}
+
 ## expand_glob_pattern pat args...
 #
 # Print only arguments that match the specified glob pattern.
