@@ -273,6 +273,28 @@ test_assert_equal "$(print_var_val_pairs A x B y C)" $'A: x\nB: y\nC:'
 
 setup_tty_colors
 
+test_case print-tty-output
+
+print "1 print"
+print_err "2 print_err" 2>&1
+print_warn "3 print_warn"
+print_dbg "4 print_dbg"
+print_q "5 print_q" ; echo X
+print_a "6 print_a" b c
+print_status "7 print_status" "" "extra"
+print_status "7 print_status" "YES" "extra"
+print_status "7 print_status" "NO" "extra"
+print_status "7 print_status" "ERROR" "extra"
+print_status "7 print_status" "WARNING" "extra"
+print_status "7 print_status" "N/A" "extra"
+print_status "7 print_status" "TODO" "extra"
+print_status "7 print_status" "..." "extra"
+print_h1 "8 print_h1"
+print_h2 "9 print_h2"
+print_h3 "10 print_h3"
+print_em "11 print_em"
+print_li "12 print_li"
+
 rm "$OUT_TMP"
 rmdir "$OUT_TMP_DIR"
 unset OUT_TMP
