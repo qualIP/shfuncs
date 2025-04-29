@@ -23,7 +23,8 @@ if [ -z "${BASH_VERSION:-}${ZSH_VERSION:-}" ] ; then echo Not running bash or zs
 typeset -f setup_tty_colors > /dev/null && return
 
 tty_light_or_dark_mode() {
-    local fgbg=${COLORFGBG:-15;0}
+    # local fgbg=${COLORFGBG:-15;0} # default=dark
+    local fgbg=${COLORFGBG:-0;15} # default=light
     local bg=${fgbg#*;}
     case "$bg" in
         0) echo dark ;;
